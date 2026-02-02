@@ -9,9 +9,8 @@ RUN npm install --legacy-peer-deps --silent
 # Copy source
 COPY . .
 
-# Build with production environment using the dedicated build:prod script
-# This script loads env/.env.production and builds with the correct environment
-RUN npm run build:prod
+# Build the production bundle
+RUN npm run build
 
 # 2) Production stage
 FROM node:18-alpine
