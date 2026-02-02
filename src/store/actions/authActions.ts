@@ -1,4 +1,4 @@
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { api } from '../api';
 import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from '../types/actionTypes';
 

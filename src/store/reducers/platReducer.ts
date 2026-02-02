@@ -1,5 +1,5 @@
 import { FETCH_PLATS_REQUEST, FETCH_PLATS_SUCCESS, FETCH_PLATS_FAILURE } from '../types/actionTypes';
-import { Plat } from '@/types';
+import type { Plat } from '@/types';
 
 interface PlatState {
   plats: Plat[];
