@@ -1,0 +1,110 @@
+import { useTranslation } from 'react-i18next';
+
+const TermsPage = () => {
+  const { t, i18n } = useTranslation();
+
+  return (
+    <div className="min-h-screen bg-white py-12 px-4">
+      <div className="mx-auto w-[85%] max-w-4xl">
+        <h1 className="text-4xl font-bold text-black mb-8" style={{ fontFamily: 'Limelight, serif' }}>
+          {t('terms.title')}
+        </h1>
+        
+        <div className="space-y-6 text-gray-700">
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section1.title')}</h2>
+            <p>{t('terms.section1.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section2.title')}</h2>
+            <p>{t('terms.section2.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section3.title')}</h2>
+            <p className="mb-4">{t('terms.section3.intro')}</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              {(t('terms.section3.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section4.title')}</h2>
+            <p className="mb-4">{t('terms.section4.intro')}</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              {(t('terms.section4.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section5.title')}</h2>
+            <p className="mb-4">{t('terms.section5.intro')}</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              {(t('terms.section5.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section6.title')}</h2>
+            <p className="mb-4">{t('terms.section6.intro')}</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              {(t('terms.section6.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section7.title')}</h2>
+            <p>{t('terms.section7.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section8.title')}</h2>
+            <p className="mb-4">{t('terms.section8.intro')}</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              {(t('terms.section8.items', { returnObjects: true }) as string[]).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section9.title')}</h2>
+            <p>{t('terms.section9.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section10.title')}</h2>
+            <p>{t('terms.section10.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section11.title')}</h2>
+            <p>{t('terms.section11.content')}</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-black mb-4">{t('terms.section12.title')}</h2>
+            <p>{t('terms.section12.content')}</p>
+          </section>
+
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-sm text-gray-500">
+              {t('terms.lastUpdated')} {new Date().toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US')}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TermsPage;

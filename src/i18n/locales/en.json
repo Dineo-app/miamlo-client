@@ -1,0 +1,262 @@
+{
+  "navbar": {
+    "brand": "Miamlo",
+    "ourDishes": "Our Dishes",
+    "ourChefs": "Our Chefs",
+    "promotions": "Promotions",
+    "becomeChef": "Become a Chef",
+    "contact": "Contact",
+    "about": "About Us",
+    "login": "Login",
+    "register": "Sign Up"
+  },
+  "home": {
+    "heroTitle": "Discover Authentic Flavors",
+    "heroDescription1": "Homemade dishes by passionate chefs, delivered right to your door. Explore our selection of culinary delights prepared with love and fresh ingredients.",
+    "heroDescription2": "Order now and savor the excellence of local cuisine!",
+    "discoverButton": "Discover Our Dishes",
+    "heroBadge": "🍲 New way to eat local",
+    "heroMainTitle": "Choose real homemade food from your neighborhood!",
+    "heroSubtitle": "MIAMLO connects food lovers with passionate cooks near them, homemade dishes inspired by cuisines from around the world, at affordable prices.",
+    "heroButtonGourmand": "I'm a foodie 😋",
+    "heroButtonChef": "I cook at home 👩‍🍳",
+    "heroAppStore": "Coming soon on",
+    "heroAppStoreApp": "App Store",
+    "heroGooglePlay": "Google Play",
+    "heroNotification": "Sign up now to be notified of the launch in your city.",
+    "heroCardTitle": "Homemade near you",
+    "heroCardSubtitle": "Today in your neighborhood:",
+    "heroCardVerified": "✅ Verified hygiene",
+    "conceptTitle": "Eating local has never been so easy",
+    "conceptSubtitle": "MIAMLO highlights local culinary talents. Discover and order homemade dishes, prepared by passionate and verified cooks.",
+    "conceptLocalTitle": "Ultra local",
+    "conceptLocalDesc": "Discover cooks a few streets away from you, follow their creations and let yourself be tempted.",
+    "conceptHomemadeTitle": "Homemade",
+    "conceptHomemadeDesc": "From family recipes to gourmet dishes, inspired by flavors from around the world. Let yourself be tempted by comforting dishes, carefully prepared, far from industrial food.",
+    "conceptSocialTitle": "Social connection",
+    "conceptSocialDesc": "MIAMLO recreates connections with your neighbors and highlights the culinary talents around you.",
+    "howTitle": "How does it work?",
+    "howSubtitle": "In a few minutes, you discover, order and pick up your dish.",
+    "howStep1Title": "Choose your dish",
+    "howStep1Desc": "Open MIAMLO, filter by type of cuisine (maghreb, italian, asian, vegetarian…) and discover dishes available around you, in real time.",
+    "howStep1Tag1": "🌍 World cuisines",
+    "howStep1Tag2": "⭐ Neighbors' reviews",
+    "howStep2Title": "Order & pay",
+    "howStep2Desc": "Validate your portion, pickup time and pay online via a secure solution. The cook receives your order directly.",
+    "howStep2Tag1": "💳 Secure payment",
+    "howStep2Tag2": "⏱ Precise time slots",
+    "howStep3Title": "Pick up your dish",
+    "howStep3Desc": "Go to the indicated address, scan your MIAMLO QR code and leave with your still hot dish. Enjoy, then leave a review.",
+    "howStep3Tag1": "📍 Integrated route",
+    "howStep3Tag2": "📝 Reviews & favorites",
+    "gourmandTitle": "🥘 For foodies",
+    "gourmandSubtitle": "A new way to eat well, local and homemade, without hassle.",
+    "gourmandCard1Title": "Homemade dishes",
+    "gourmandCard1Desc": "Authentic recipes prepared with love by your neighbors, far from industrial food.",
+    "gourmandCard2Title": "Affordable prices",
+    "gourmandCard2Desc": "Generous portions, often cheaper than classic delivery platforms.",
+    "gourmandCard3Title": "Near you",
+    "gourmandCard3Desc": "Dishes available a few minutes walk away: you order, you pick up, you enjoy.",
+    "chefTitle": "👩‍🍳 For cooks",
+    "chefSubtitle": "Share your culinary talent and earn extra income, at your own pace, from your kitchen.",
+    "chefCard1Title": "Culinary showcase",
+    "chefCard1Desc": "Present your specialties, your photos and the story of your recipes on your MIAMLO profile.",
+    "chefCard2Title": "Totally flexible",
+    "chefCard2Desc": "You choose your days, your schedules and the number of portions available at each service.",
+    "chefCard3Title": "Secure payment",
+    "chefCard3Desc": "MIAMLO manages online payment: you receive your due automatically, without hassle.",
+    "securityTitle": "Security & hygiene first",
+    "securitySubtitle": "We implement a clear framework to protect foodies and cooks.",
+    "securityCard1Title": "Verified profiles",
+    "securityCard1Desc": "Identity verification of cooks, confirmed address and contact information accessible in one click.",
+    "securityCard2Title": "Hygiene charter",
+    "securityCard2Desc": "Each cook commits to a simple and precise hygiene charter (cleanliness, cold chain, allergens, etc.).",
+    "securityCard3Title": "Transparent reviews",
+    "securityCard3Desc": "Ratings and comments are never bought. Your feedback helps highlight the best talents.",
+    "faqTitle": "Frequently asked questions",
+    "faqSubtitle": "A simple app, but we already answer your main questions.",
+    "faq1Question": "📍 In which cities will MIAMLO be available?",
+    "faq1Answer": "We are starting with a few pilot cities in Île-de-France, then will progressively open other neighborhoods. Sign up to be informed of MIAMLO's arrival near you.",
+    "faq2Question": "💶 How much does it cost for the customer?",
+    "faq2Answer": "You only pay the price of the dish. During the launch phase, no service fees will be applied for early users.",
+    "faq3Question": "👩‍🍳 Who can become a MIAMLO cook?",
+    "faq3Answer": "Any adult, with a real passion for cooking and ready to respect our hygiene charter. Additional information will be specified in the app during registration.",
+    "faq4Question": "📲 The app is not yet online, what can I do?",
+    "faq4Answer": "You can already share MIAMLO around you and scan the QR code to leave your email. You will be among the first to test the platform."
+  },
+  "footer": {
+    "description": "The delivery platform for homemade dishes by passionate chefs.",
+    "quickLinks": "Quick Links",
+    "legal": "Legal",
+    "followUs": "Follow Us",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "rights": "All rights reserved",
+    "madeWith": "Made with",
+    "forYou": "for you"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Enter your phone number to continue",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "6 12 34 56 78",
+    "loginButton": "Login",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Sign up"
+  },
+  "register": {
+    "title": "Sign Up",
+    "subtitle": "Create your account to get started",
+    "firstNameLabel": "First Name",
+    "firstNamePlaceholder": "Your first name",
+    "lastNameLabel": "Last Name",
+    "lastNamePlaceholder": "Your last name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "your.email@example.com",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "6 12 34 56 78",
+    "registerButton": "Sign Up",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Login"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "section1": {
+      "title": "1. Information Collected",
+      "intro": "We collect the following information when you use our platform:",
+      "items": [
+        "Identification information (first name, last name, email)",
+        "Delivery information (address, phone)",
+        "Payment information (securely processed)",
+        "Order history and preferences"
+      ]
+    },
+    "section2": {
+      "title": "2. Data Usage",
+      "intro": "Your personal data is used to:",
+      "items": [
+        "Process and deliver your orders",
+        "Improve our services and your user experience",
+        "Communicate with you regarding your orders",
+        "Send promotional offers (with your consent)"
+      ]
+    },
+    "section3": {
+      "title": "3. Data Protection",
+      "content": "We implement appropriate technical and organizational security measures to protect your personal data against unauthorized access, modification, disclosure, or destruction."
+    },
+    "section4": {
+      "title": "4. Data Sharing",
+      "intro": "Your data may be shared with:",
+      "items": [
+        "Partner chefs for preparing your orders",
+        "Delivery service providers",
+        "Secure payment processors",
+        "Legal authorities if required by law"
+      ]
+    },
+    "section5": {
+      "title": "5. Your Rights",
+      "intro": "In accordance with GDPR, you have the following rights:",
+      "items": [
+        "Right to access your personal data",
+        "Right to rectify your data",
+        "Right to erasure of your data",
+        "Right to restriction of processing",
+        "Right to data portability",
+        "Right to object to processing"
+      ]
+    },
+    "section6": {
+      "title": "6. Cookies",
+      "content": "We use cookies to improve your experience on our site. You can manage your cookie preferences in your browser settings."
+    },
+    "section7": {
+      "title": "7. Contact",
+      "content": "For any questions regarding this privacy policy or to exercise your rights, contact us at: privacy@miamlo.com"
+    },
+    "lastUpdated": "Last updated:"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "section1": {
+      "title": "1. Acceptance of Terms",
+      "content": "By accessing and using the Miamlo platform, you agree to be bound by these terms of service. If you do not accept these terms, please do not use our services."
+    },
+    "section2": {
+      "title": "2. Service Description",
+      "content": "Miamlo is a platform that connects passionate chefs with customers who want to order homemade meals. We facilitate ordering, payment, and delivery of meals."
+    },
+    "section3": {
+      "title": "3. Registration and Account",
+      "intro": "To use certain services, you must create an account:",
+      "items": [
+        "You must provide accurate and up-to-date information",
+        "You are responsible for the confidentiality of your password",
+        "You must be at least 18 years old to create an account",
+        "One account per person is allowed"
+      ]
+    },
+    "section4": {
+      "title": "4. Orders and Payments",
+      "intro": "Regarding orders:",
+      "items": [
+        "All orders are subject to acceptance by the chef",
+        "Prices are indicated in euros including tax",
+        "Payment is made at the time of order",
+        "We accept credit cards and other indicated payment methods"
+      ]
+    },
+    "section5": {
+      "title": "5. Cancellation and Refund",
+      "intro": "Cancellation policy:",
+      "items": [
+        "You can cancel an order up to 2 hours before the scheduled delivery",
+        "Refunds are processed within 5-7 business days",
+        "In case of a problem with your order, contact our customer service",
+        "Late cancellations may incur fees"
+      ]
+    },
+    "section6": {
+      "title": "6. Responsibilities",
+      "intro": "Miamlo acts as an intermediary:",
+      "items": [
+        "Chefs are responsible for the quality and food safety of their dishes",
+        "We are not responsible for allergies or food intolerances",
+        "Delivery times are indicative and may vary",
+        "You must report any problem within 24 hours of receipt"
+      ]
+    },
+    "section7": {
+      "title": "7. Intellectual Property",
+      "content": "All content present on Miamlo (texts, images, logos, etc.) is protected by intellectual property rights. Any unauthorized reproduction is prohibited."
+    },
+    "section8": {
+      "title": "8. User Conduct",
+      "intro": "You agree to:",
+      "items": [
+        "Not use the platform for illegal purposes",
+        "Respect other users and chefs",
+        "Not post offensive or inappropriate content",
+        "Not attempt to hack or disrupt the service"
+      ]
+    },
+    "section9": {
+      "title": "9. Modification of Terms",
+      "content": "We reserve the right to modify these terms at any time. Changes will be posted on this page with a new update date."
+    },
+    "section10": {
+      "title": "10. Termination",
+      "content": "We may suspend or terminate your account in case of violation of these terms or abuse of the platform."
+    },
+    "section11": {
+      "title": "11. Applicable Law",
+      "content": "These terms are governed by French law. Any dispute will be submitted to the jurisdiction of French courts."
+    },
+    "section12": {
+      "title": "12. Contact",
+      "content": "For any questions regarding these terms, contact us at: legal@miamlo.com"
+    },
+    "lastUpdated": "Last updated:"  }
+}
