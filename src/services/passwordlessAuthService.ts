@@ -136,14 +136,11 @@ export const passwordlessAuthService = {
    * STEP 2: Verify Login OTP
    */
   async verifyLogin(data: VerifyOtpRequest) {
-    console.log('🔐 Sending verify login request:', data);
     const response = await api.post<{
       success: boolean;
       message: string;
       data: AuthData;
     }>('/auth/passwordless/verify-login', data);
-    
-    console.log('✅ Verify login response:', response.data);
     
     if (response.data.success && response.data.data) {
       const { access_token, refresh_token } = response.data.data;

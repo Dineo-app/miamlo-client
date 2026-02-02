@@ -61,12 +61,9 @@ const LoginPage = () => {
           navigate('/customer/dashboard');
         }
       } else {
-        console.error('❌ Unexpected result structure:', result);
         setErrorMessage('Login successful but unexpected response format');
       }
     } catch (err: any) {
-      console.error('❌ Verify OTP error:', err);
-      console.error('❌ Error response:', err.response?.data);
       setErrorMessage(err.response?.data?.message || err.message || 'Invalid OTP code');
     }
   };
