@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dialog, DialogPanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ChevronDownIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState } from '@/store';
+import { logout } from '@/store/actions/authActions';
 import logo from '@/assets/images/logo-removebg.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   
   const navigation = [
     { name: t('navbar.ourDishes'), href: '/plats' },
@@ -18,6 +23,28 @@ const Navbar = () => {
     { name: t('navbar.contact'), href: '/contact' },
     { name: t('navbar.about'), href: '/about' },
   ];
+
+  // Get role-based routes
+  const getRoleRoutes = () => {
+    if (!user?.role) return { profile: '/customer/profile', dashboard: '/customer/dashboard' };
+    
+    switch (user.role) {
+      case 'ADMIN':
+        return { profile: '/admin/profile', dashboard: '/admin/dashboard' };
+      case 'PROVIDER':
+        return { profile: '/chef/profile', dashboard: '/chef/dashboard' };
+      case 'CUSTOMER':
+      default:
+        return { profile: '/customer/profile', dashboard: '/customer/dashboard' };
+    }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout() as any);
+    navigate('/login');
+  };
+
+  const routes = getRoleRoutes();
 
   return (
     <header className="w-full sticky top-0 z-40" style={{ background: 'rgba(255, 214, 10, 0.96)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
@@ -102,21 +129,80 @@ const Navbar = () => {
             Télécharger l'application
           </button>
 
-          <button
-            onClick={() => navigate('/login')}
-            className="px-5 py-2.5 text-[0.9rem] font-semibold rounded-full bg-black text-white hover:shadow-2xl transition-all"
-            style={{ boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 22px 40px rgba(0, 0, 0, 0.35)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
-            }}
-          >
-            Connexion / S'inscrire
-          </button>
+          {isAuthenticated && user ? (
+            <Menu as="div" className="relative">
+              <MenuButton className="flex items-center gap-2 px-5 py-2.5 text-[0.9rem] font-semibold rounded-full bg-black text-white hover:shadow-2xl transition-all"
+                style={{ boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 22px 40px rgba(0, 0, 0, 0.35)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
+                }}
+              >
+                <UserCircleIcon className="h-5 w-5" />
+                <span>{user.firstName}</span>
+                <ChevronDownIcon className="h-4 w-4" />
+              </MenuButton>
+              <MenuItems 
+                className="absolute right-0 mt-2 w-48 origin-top-right rounded-lg focus:outline-none z-50"
+                style={{ backgroundColor: 'white', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+              >
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => navigate(routes.profile)}
+                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900 first:rounded-t-lg`}
+                      style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
+                    >
+                      👤 Mon Profil
+                    </button>
+                  )}
+                </MenuItem>
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => navigate(routes.dashboard)}
+                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900`}
+                      style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
+                    >
+                      📊 Tableau de bord
+                    </button>
+                  )}
+                </MenuItem>
+                <div className="h-px bg-gray-200 my-1"></div>
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={handleLogout}
+                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 last:rounded-b-lg`}
+                      style={{ backgroundColor: active ? '#fee2e2' : 'white', border: 'none' }}
+                    >
+                      🚪 Déconnexion
+                    </button>
+                  )}
+                </MenuItem>
+              </MenuItems>
+            </Menu>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="px-5 py-2.5 text-[0.9rem] font-semibold rounded-full bg-black text-white hover:shadow-2xl transition-all"
+              style={{ boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 22px 40px rgba(0, 0, 0, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
+              }}
+            >
+              Connexion / S'inscrire
+            </button>
+          )}
         </div>
       </nav>
 
@@ -191,12 +277,35 @@ const Navbar = () => {
                 >
                   Télécharger l'application
                 </button>
-                <button
-                  onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
-                  className="w-full text-left px-3 py-2 text-base font-semibold bg-black text-white rounded-lg hover:bg-gray-800"
-                >
-                  Connexion / S'inscrire
-                </button>
+                {isAuthenticated && user ? (
+                  <>
+                    <button
+                      onClick={() => { navigate(routes.profile); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
+                    >
+                      👤 Mon Profil
+                    </button>
+                    <button
+                      onClick={() => { navigate(routes.dashboard); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
+                    >
+                      📊 Tableau de bord
+                    </button>
+                    <button
+                      onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
+                    >
+                      🚪 Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-3 py-2 text-base font-semibold bg-black text-white rounded-lg hover:bg-gray-800"
+                  >
+                    Connexion / S'inscrire
+                  </button>
+                )}
               </div>
             </div>
           </div>

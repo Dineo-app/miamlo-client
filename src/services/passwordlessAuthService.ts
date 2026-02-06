@@ -67,6 +67,7 @@ export interface AuthData {
 // Cookie storage utilities
 const TOKEN_COOKIE = 'auth_token';
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
+const USER_DATA_KEY = 'user_data';
 const COOKIE_OPTIONS = {
   secure: true,
   sameSite: 'strict' as const,
@@ -78,12 +79,22 @@ export const storeTokens = (accessToken: string, refreshToken: string) => {
   Cookies.set(REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_OPTIONS);
 };
 
+export const storeUserData = (user: any) => {
+  localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
+};
+
+export const getUserData = () => {
+  const data = localStorage.getItem(USER_DATA_KEY);
+  return data ? JSON.parse(data) : null;
+};
+
 export const getAccessToken = () => Cookies.get(TOKEN_COOKIE);
 export const getRefreshToken = () => Cookies.get(REFRESH_TOKEN_COOKIE);
 
 export const clearTokens = () => {
   Cookies.remove(TOKEN_COOKIE);
   Cookies.remove(REFRESH_TOKEN_COOKIE);
+  localStorage.removeItem(USER_DATA_KEY);
 };
 
 /**

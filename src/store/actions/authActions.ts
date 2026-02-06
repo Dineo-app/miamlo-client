@@ -1,6 +1,9 @@
 import type { Dispatch } from 'redux';
 import passwordlessAuthService, { 
   clearTokens,
+  getAccessToken,
+  getUserData,
+  storeUserData,
 } from '@/services/passwordlessAuthService';
 import type {
   RegisterRequest,
@@ -22,6 +25,7 @@ import {
   RESEND_OTP_REQUEST,
   RESEND_OTP_SUCCESS,
   RESEND_OTP_FAILURE,
+  RESTORE_AUTH,
   LOGOUT,
 } from '../types/actionTypes';
 
@@ -78,6 +82,9 @@ export const verifyRegistrationOtp = (data: VerifyRegistrationRequest) => {
           role: response.data.user.role,
           address: response.data.user.address,
         };
+        
+        // Store user data in localStorage
+        storeUserData(user);
         
         dispatch({
           type: VERIFY_OTP_SUCCESS,
@@ -156,6 +163,9 @@ export const verifyLoginOtp = (data: VerifyOtpRequest) => {
           address: response.data.user.address,
         };
         
+        // Store user data in localStorage
+        storeUserData(user);
+        
         dispatch({
           type: VERIFY_OTP_SUCCESS,
           payload: {
@@ -216,5 +226,65 @@ export const logout = () => {
   return (dispatch: Dispatch) => {
     clearTokens();
     dispatch({ type: LOGOUT });
+  };
+};
+
+/**
+ * Restore authentication state from token on app load
+ */
+export const restoreAuth = () => {
+  return async (dispatch: Dispatch) => {
+    try {
+      const token = getAccessToken();
+      const userData = getUserData();
+      
+      if (!token || !userData) {
+        // No token or user data, mark as not loading
+        dispatch({
+          type: RESTORE_AUTH,
+          payload: {
+            user: null,
+            isAuthenticated: false,
+          },
+        });
+        return;
+      }
+
+      // Decode JWT token to check if it's expired
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      // Check if token is expired
+      if (payload.exp && payload.exp < currentTime) {
+        clearTokens();
+        dispatch({
+          type: RESTORE_AUTH,
+          payload: {
+            user: null,
+            isAuthenticated: false,
+          },
+        });
+        return;
+      }
+
+      // Token valid and user data exists - restore auth
+      dispatch({
+        type: RESTORE_AUTH,
+        payload: {
+          user: userData,
+          isAuthenticated: true,
+        },
+      });
+    } catch (error) {
+      // Token invalid or expired, clear it
+      clearTokens();
+      dispatch({
+        type: RESTORE_AUTH,
+        payload: {
+          user: null,
+          isAuthenticated: false,
+        },
+      });
+    }
   };
 };

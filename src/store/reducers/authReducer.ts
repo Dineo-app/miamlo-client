@@ -11,6 +11,7 @@ import {
   RESEND_OTP_REQUEST,
   RESEND_OTP_SUCCESS,
   RESEND_OTP_FAILURE,
+  RESTORE_AUTH,
   LOGOUT,
 } from '../types/actionTypes';
 import type { AuthState } from '../types';
@@ -23,7 +24,7 @@ interface AuthAction {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  loading: false,
+  loading: true, // Start as true to prevent premature redirects
   error: null,
   otpSent: false,
   otpPhone: null,
@@ -132,6 +133,16 @@ export const authReducer = (state = initialState, action: AuthAction): AuthState
         ...state,
         loading: false,
         error: action.payload,
+      };
+    
+    // Restore auth from token
+    case RESTORE_AUTH:
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        loading: false,
+        error: null,
       };
       
     case LOGOUT:
