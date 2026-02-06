@@ -64,6 +64,8 @@ export interface ChefDetail {
   totalOrders: number;
   completedOrders: number;
   activeOrders: number;
+  isActive?: boolean;
+  description?: string;
 }
 
 export interface CreatePlateRequest {

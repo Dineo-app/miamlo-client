@@ -49,7 +49,7 @@ export interface UserInfo {
   last_name: string;
   email: string;
   phone: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: 'CUSTOMER' | 'ADMIN' | 'PROVIDER';
   address?: string;
   user_image?: string | null;
   is_verified: boolean;

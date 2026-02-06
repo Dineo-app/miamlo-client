@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
-import { fetchChefDetail, createPlateForChef, type CreatePlateRequest } from '@/store/actions/adminActions';
-import { DISH_CATEGORIES, getCategoriesByType, getCategoryEmoji } from '@/constants/categories';
+import { fetchChefDetail } from '@/store/actions/adminActions';
+import { DISH_CATEGORIES, getCategoryEmoji } from '@/constants/categories';
 import { api } from '@/store/api';
 import {
   UserCircleIcon,

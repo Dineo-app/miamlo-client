@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/actions/authActions';
 import { fetchAdminStats } from '@/store/actions/adminActions';
-import type { RootState } from '@/store/types';
+import type { RootState } from '@/store';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
