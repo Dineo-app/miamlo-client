@@ -24,10 +24,30 @@ const COUNTRIES = [
   { code: 'NO', name: 'Norway', flag: '🇳🇴' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
+// Phone country codes (matching login page)
+const PHONE_CODES = [
+  { code: '+33', flag: '🇫🇷', name: 'France' },
+  { code: '+1', flag: '🇺🇸', name: 'USA' },
+  { code: '+44', flag: '🇬🇧', name: 'UK' },
+  { code: '+49', flag: '🇩🇪', name: 'Germany' },
+  { code: '+34', flag: '🇪🇸', name: 'Spain' },
+  { code: '+39', flag: '🇮🇹', name: 'Italy' },
+  { code: '+212', flag: '🇲🇦', name: 'Morocco' },
+  { code: '+213', flag: '🇩🇿', name: 'Algeria' },
+  { code: '+216', flag: '🇹🇳', name: 'Tunisia' },
+  { code: '+1', flag: '🇨🇦', name: 'Canada' },
+  { code: '+32', flag: '🇧🇪', name: 'Belgium' },
+  { code: '+41', flag: '🇨🇭', name: 'Switzerland' },
+  { code: '+31', flag: '🇳🇱', name: 'Netherlands' },
+  { code: '+46', flag: '🇸🇪', name: 'Sweden' },
+  { code: '+47', flag: '🇳🇴', name: 'Norway' },
+];
+
 const BecomeChefPage = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [selectedPhoneCode, setSelectedPhoneCode] = useState('+33');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -116,7 +136,7 @@ const BecomeChefPage = () => {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.trim(),
+        phone: selectedPhoneCode + formData.phone.trim(),
         dateOfBirth: formData.dateOfBirth,
         country: formData.country,
         description: formData.description.trim(),
@@ -160,8 +180,6 @@ const BecomeChefPage = () => {
       setIsSubmitting(false);
     }
   };
-  
-  const selectedCountry = COUNTRIES.find(c => c.name === formData.country);
   
   return (
     <div className="min-h-screen" style={{ background: '#f9f6ef' }}>
@@ -264,14 +282,27 @@ const BecomeChefPage = () => {
                 <label className="block text-sm font-semibold mb-1.5">
                   Téléphone <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-black/10'} bg-[#fffdf5] text-gray-900 focus:outline-none focus:border-[#ffd60a]`}
-                  placeholder="+33 6 12 34 56 78"
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={selectedPhoneCode}
+                    onChange={(e) => setSelectedPhoneCode(e.target.value)}
+                    className={`w-32 px-2 py-2.5 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-black/10'} bg-[#fffdf5] text-gray-900 focus:outline-none focus:border-[#ffd60a] text-sm`}
+                  >
+                    {PHONE_CODES.map((c) => (
+                      <option key={c.name} value={c.code}>
+                        {c.flag} {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={`flex-1 px-4 py-2.5 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-black/10'} bg-[#fffdf5] text-gray-900 focus:outline-none focus:border-[#ffd60a]`}
+                    placeholder="6 12 34 56 78"
+                  />
+                </div>
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
             </div>
@@ -297,26 +328,19 @@ const BecomeChefPage = () => {
                 <label className="block text-sm font-semibold mb-1.5">
                   Pays <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  {selectedCountry && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xl">
-                      {selectedCountry.flag}
-                    </div>
-                  )}
-                  <select
-                    name="country"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className={`w-full ${selectedCountry ? 'pl-12' : 'pl-4'} pr-4 py-2.5 rounded-xl border ${errors.country ? 'border-red-500' : 'border-black/10'} bg-[#fffdf5] text-gray-900 focus:outline-none focus:border-[#ffd60a] appearance-none`}
-                  >
-                    <option value="">Sélectionnez votre pays</option>
-                    {COUNTRIES.map(country => (
-                      <option key={country.code} value={country.name}>
-                        {country.flag} {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2.5 rounded-xl border ${errors.country ? 'border-red-500' : 'border-black/10'} bg-[#fffdf5] text-gray-900 focus:outline-none focus:border-[#ffd60a]`}
+                >
+                  <option value="">Sélectionnez votre pays</option>
+                  {COUNTRIES.map(country => (
+                    <option key={country.code} value={country.name}>
+                      {country.flag} {country.name}
+                    </option>
+                  ))}
+                </select>
                 {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
               </div>
             </div>
