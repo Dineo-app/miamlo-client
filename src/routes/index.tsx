@@ -26,6 +26,8 @@ const ChefProfilePage = lazy(() => import('@/pages/ChefProfilePage'));
 const ChefDashboard = lazy(() => import('@/pages/ChefDashboard'));
 const AdminChefsPage = lazy(() => import('@/pages/AdminChefsPage'));
 const AdminChefDetailPage = lazy(() => import('@/pages/AdminChefDetailPage'));
+const AdminCandidaturesPage = lazy(() => import('@/pages/AdminCandidaturesPage'));
+const AdminCandidatureDetailPage = lazy(() => import('@/pages/AdminCandidatureDetailPage'));
 
 const Layout = () => {
   return (
@@ -156,6 +158,26 @@ export const router = createBrowserRouter([
       <Suspense fallback={<ContentLoader />}>
         <ProtectedRoute role="ADMIN">
           <AdminChefDetailPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/candidatures',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="ADMIN">
+          <AdminCandidaturesPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/candidatures/:id',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="ADMIN">
+          <AdminCandidatureDetailPage />
         </ProtectedRoute>
       </Suspense>
     ),

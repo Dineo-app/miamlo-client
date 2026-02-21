@@ -198,16 +198,19 @@ const AdminDashboard = () => {
             <p className="text-gray-600 text-sm">Voir et gérer tous les chefs</p>
           </button>
 
+          <button 
+            onClick={() => navigate('/admin/candidatures')}
+            className="bg-gradient-to-br from-yellow-400 to-yellow-500 text-black rounded-lg shadow-sm p-6 text-left hover:shadow-lg hover:scale-105 transition-all relative"
+          >
+            <div className="text-4xl mb-3">📋</div>
+            <h3 className="text-lg font-semibold mb-2">Candidatures</h3>
+            <p className="text-yellow-900 text-sm">Voir les candidatures des chefs</p>
+          </button>
+
           <button className="bg-white rounded-lg shadow-sm p-6 text-left hover:shadow-md transition-shadow">
             <div className="text-3xl mb-3">🍽️</div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Gérer les Plats</h3>
             <p className="text-gray-600 text-sm">Modérer et gérer tous les plats</p>
-          </button>
-
-          <button className="bg-white rounded-lg shadow-sm p-6 text-left hover:shadow-md transition-shadow">
-            <div className="text-3xl mb-3">📊</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Voir les Rapports</h3>
-            <p className="text-gray-600 text-sm">Accéder aux statistiques détaillées</p>
           </button>
         </div>
 
