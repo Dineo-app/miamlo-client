@@ -9,6 +9,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const PlatsPage = lazy(() => import('@/pages/PlatsPage'));
 const ChefsPage = lazy(() => import('@/pages/ChefsPage'));
+const PublicChefProfilePage = lazy(() => import('@/pages/PublicChefProfilePage'));
+const PlatDetailPage = lazy(() => import('@/pages/PlatDetailPage'));
 const PromotionsPage = lazy(() => import('@/pages/PromotionsPage'));
 const BecomeChefPage = lazy(() => import('@/pages/BecomeChefPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
@@ -28,6 +30,8 @@ const AdminChefsPage = lazy(() => import('@/pages/AdminChefsPage'));
 const AdminChefDetailPage = lazy(() => import('@/pages/AdminChefDetailPage'));
 const AdminCandidaturesPage = lazy(() => import('@/pages/AdminCandidaturesPage'));
 const AdminCandidatureDetailPage = lazy(() => import('@/pages/AdminCandidatureDetailPage'));
+const AdminContactMessagesPage = lazy(() => import('@/pages/AdminContactMessagesPage'));
+const AdminContactMessageDetailPage = lazy(() => import('@/pages/AdminContactMessageDetailPage'));
 
 const Layout = () => {
   return (
@@ -56,6 +60,14 @@ export const router = createBrowserRouter([
       {
         path: '/chefs',
         element: <ChefsPage />,
+      },
+      {
+        path: '/chefs/:chefId',
+        element: <PublicChefProfilePage />,
+      },
+      {
+        path: '/plats/:platId',
+        element: <PlatDetailPage />,
       },
       {
         path: '/promotions',
@@ -178,6 +190,26 @@ export const router = createBrowserRouter([
       <Suspense fallback={<ContentLoader />}>
         <ProtectedRoute role="ADMIN">
           <AdminCandidatureDetailPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/messages',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="ADMIN">
+          <AdminContactMessagesPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/admin/messages/:id',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="ADMIN">
+          <AdminContactMessageDetailPage />
         </ProtectedRoute>
       </Suspense>
     ),

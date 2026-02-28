@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/actions/authActions';
 import { fetchAdminStats } from '@/store/actions/adminActions';
+import { api } from '@/store/api';
 import type { RootState } from '@/store';
 
 const AdminDashboard = () => {
@@ -10,11 +11,23 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const { stats, loading, error } = useSelector((state: RootState) => state.admin);
+  const [unviewedMessages, setUnviewedMessages] = useState(0);
 
   useEffect(() => {
     // Fetch admin stats on component mount
     (dispatch as any)(fetchAdminStats());
+    // Fetch unviewed contact messages count
+    fetchUnviewedCount();
   }, [dispatch]);
+
+  const fetchUnviewedCount = async () => {
+    try {
+      const response = await api.get('/contact/unviewed-count');
+      setUnviewedMessages(response.data.data.count);
+    } catch (error) {
+      console.error('Error fetching unviewed messages count:', error);
+    }
+  };
 
   const handleLogout = () => {
     (dispatch as any)(logout());
@@ -179,7 +192,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <button 
             onClick={() => navigate('/admin/create-chef')}
             className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-sm p-6 text-left hover:shadow-lg hover:scale-105 transition-all"
@@ -205,6 +218,20 @@ const AdminDashboard = () => {
             <div className="text-4xl mb-3">📋</div>
             <h3 className="text-lg font-semibold mb-2">Candidatures</h3>
             <p className="text-yellow-900 text-sm">Voir les candidatures des chefs</p>
+          </button>
+
+          <button 
+            onClick={() => navigate('/admin/messages')}
+            className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-sm p-6 text-left hover:shadow-lg hover:scale-105 transition-all relative"
+          >
+            {unviewedMessages > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                {unviewedMessages > 99 ? '99+' : unviewedMessages}
+              </div>
+            )}
+            <div className="text-4xl mb-3">📬</div>
+            <h3 className="text-lg font-semibold mb-2">Messages</h3>
+            <p className="text-blue-50 text-sm">Voir les messages de contact</p>
           </button>
 
           <button className="bg-white rounded-lg shadow-sm p-6 text-left hover:shadow-md transition-shadow">
