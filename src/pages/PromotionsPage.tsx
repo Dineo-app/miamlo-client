@@ -156,7 +156,7 @@ const PromotionsPage = () => {
 
   // Refs
   const resultsRef = useRef<HTMLDivElement>(null);
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // SEO
   useEffect(() => {
