@@ -190,14 +190,14 @@ const LoginPage = () => {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={loading}
-                  className="w-full py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                  className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
                   Renvoyer le code
                 </button>
                 <button
                   type="button"
                   onClick={() => { setStep('phone'); setOtp(''); }}
-                  className="w-full py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                  className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
                   ← Modifier le numéro
                 </button>

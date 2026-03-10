@@ -5,6 +5,7 @@ import { logout } from '@/store/actions/authActions';
 import type { RootState } from '@/store/types';
 import cartService from '@/services/cartService';
 import favoritesService from '@/services/favoritesService';
+import logo from '@/assets/images/logo-removebg.png';
 
 // Sub-pages
 import CustomerOrdersPage from './CustomerOrdersPage';
@@ -201,31 +202,34 @@ const CustomerDashboard = () => {
 
   return (
     <div className="min-h-screen" style={{ background: '#f9f6ef' }}>
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 bg-white shadow-sm">
+      {/* Top bar — yellow like the shared Navbar */}
+      <header className="sticky top-0 z-30" style={{ background: 'rgba(255, 214, 10, 0.96)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-2 rounded-lg hover:bg-black/5 transition-colors">
+              <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
             <button onClick={() => navigate('/')} className="flex items-center gap-2">
-              <span className="text-xl font-bold tracking-widest" style={{ fontFamily: 'Poppins, sans-serif' }}>MIAMLO</span>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+                <img alt="Miamlo Logo" src={logo} className="w-full h-full object-contain" />
+              </div>
+              <span className="text-base font-bold tracking-widest text-black" style={{ fontFamily: 'Poppins, sans-serif', letterSpacing: '0.14em' }}>MIAMLO</span>
             </button>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => handleTabChange('favorites')} className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+          <div className="flex items-center gap-2">
+            <button onClick={() => handleTabChange('favorites')} className="relative p-2 rounded-full hover:bg-black/5 transition-colors">
+              <svg className="w-5 h-5 text-black/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
               {favoritesCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{favoritesCount}</span>}
             </button>
-            <button onClick={() => handleTabChange('cart')} className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
-              {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#ffdd00] text-black text-[10px] font-bold rounded-full flex items-center justify-center">{cartCount}</span>}
+            <button onClick={() => handleTabChange('cart')} className="relative p-2 rounded-full hover:bg-black/5 transition-colors">
+              <svg className="w-5 h-5 text-black/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
+              {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-black text-white text-[10px] font-bold rounded-full flex items-center justify-center">{cartCount}</span>}
             </button>
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
-              <div className="w-8 h-8 rounded-full bg-[#ffdd00] flex items-center justify-center">
-                <span className="text-sm font-bold text-black">{user?.firstName?.charAt(0)?.toUpperCase()}</span>
+            <div className="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-black/10">
+              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                <span className="text-sm font-bold text-white">{user?.firstName?.charAt(0)?.toUpperCase()}</span>
               </div>
-              <span className="text-sm font-medium text-gray-700">{user?.firstName}</span>
+              <span className="text-sm font-semibold text-black">{user?.firstName}</span>
             </div>
           </div>
         </div>
@@ -243,17 +247,17 @@ const CustomerDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
-                  className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-[#ffdd00]/15 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                  className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-[#ffdd00]/20 text-gray-900' : 'text-gray-500 hover:bg-[#f9f6ef] hover:text-gray-800'}`}
                 >
-                  <span className={activeTab === item.id ? 'text-[#e6a700]' : 'text-gray-400'}>{item.icon}</span>
+                  <span className={activeTab === item.id ? 'text-[#d4a300]' : 'text-gray-400'}>{item.icon}</span>
                   <span>{item.label}</span>
                   {item.badge != null && <span className="ml-auto bg-[#ffdd00] text-black text-xs font-bold px-2 py-0.5 rounded-full">{item.badge}</span>}
                 </button>
               ))}
             </div>
             <div className="px-3 pt-4 border-t border-gray-100">
-              <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
+                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 <span>D&eacute;connexion</span>
               </button>
             </div>
