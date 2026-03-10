@@ -24,7 +24,6 @@ const OrderDescriptionPage = lazy(() => import('@/pages/OrderDescriptionPage'));
 const PaymentPage = lazy(() => import('@/pages/PaymentPage'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
 const CreateChefPage = lazy(() => import('@/pages/CreateChefPage'));
-const CustomerProfilePage = lazy(() => import('@/pages/CustomerProfilePage'));
 const AdminProfilePage = lazy(() => import('@/pages/AdminProfilePage'));
 const ChefProfilePage = lazy(() => import('@/pages/ChefProfilePage'));
 const ChefDashboard = lazy(() => import('@/pages/ChefDashboard'));
@@ -192,16 +191,6 @@ export const router = createBrowserRouter([
       <Suspense fallback={<ContentLoader />}>
         <ProtectedRoute role="ADMIN">
           <CreateChefPage />
-        </ProtectedRoute>
-      </Suspense>
-    ),
-  },
-  {
-    path: '/customer/profile',
-    element: (
-      <Suspense fallback={<ContentLoader />}>
-        <ProtectedRoute role="CUSTOMER">
-          <CustomerProfilePage />
         </ProtectedRoute>
       </Suspense>
     ),

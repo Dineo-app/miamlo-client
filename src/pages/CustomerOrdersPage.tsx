@@ -1,8 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 import orderService from '@/services/orderService';
 import { OrderStatus } from '@/services/orderService';
 import type { Order } from '@/services/orderService';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
 
 type OrderTab = 'enCours' | 'livree' | 'annulee';
 
@@ -11,7 +14,7 @@ const STATUS_COLORS: Record<string, string> = {
   CONFIRMED: 'bg-blue-100 text-blue-800',
   PREPARING: 'bg-orange-100 text-orange-800',
   READY: 'bg-green-100 text-green-800',
-  DELIVERED: 'bg-green-100 text-green-800',
+  COMPLETED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
@@ -21,6 +24,10 @@ const CustomerOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<OrderTab>('enCours');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; orderId: string | null }>({ open: false, orderId: null });
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
+  const [platDetails, setPlatDetails] = useState<Record<string, { name: string; imageUrl: string | null }>>({});
+  const platCacheRef = useRef<Record<string, { name: string; imageUrl: string | null }>>({});
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -28,7 +35,7 @@ const CustomerOrdersPage = () => {
       'CONFIRMED': t('customerOrders.statusConfirmed'),
       'PREPARING': t('customerOrders.statusInPreparation'),
       'READY': t('customerOrders.statusReady'),
-      'DELIVERED': t('customerOrders.statusDelivered'),
+      'COMPLETED': t('customerOrders.statusDelivered'),
       'CANCELLED': t('customerOrders.statusCancelled'),
     };
     return labels[status] || status;
@@ -43,6 +50,21 @@ const CustomerOrdersPage = () => {
       setLoading(true);
       const data = await orderService.getUserOrders();
       setOrders(data);
+      // Fetch plat details for images
+      const uniquePlatIds = [...new Set(data.map(o => o.platId).filter(Boolean))];
+      const toFetch = uniquePlatIds.filter(id => !platCacheRef.current[id]);
+      await Promise.all(toFetch.map(async (platId) => {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/public/plats/${platId}`);
+          if (res.data?.data) {
+            platCacheRef.current[platId] = {
+              name: res.data.data.name,
+              imageUrl: res.data.data.imageUrl || null,
+            };
+          }
+        } catch { /* skip */ }
+      }));
+      setPlatDetails({ ...platCacheRef.current });
     } catch (err) {
       console.error('Error fetching orders:', err);
     } finally {
@@ -50,14 +72,26 @@ const CustomerOrdersPage = () => {
     }
   };
 
-  const handleCancel = async (orderId: string) => {
-    if (!confirm(t('customerOrders.cancelConfirm'))) return;
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+  };
+
+  const handleCancelClick = (orderId: string) => {
+    setConfirmModal({ open: true, orderId });
+  };
+
+  const handleCancelConfirm = async () => {
+    const orderId = confirmModal.orderId;
+    if (!orderId) return;
+    setConfirmModal({ open: false, orderId: null });
     try {
       setCancellingId(orderId);
       await orderService.cancelOrder(orderId);
       await fetchOrders();
+      showToast(t('customerOrders.cancelSuccess'), 'success');
     } catch {
-      alert(t('customerOrders.cancelError'));
+      showToast(t('customerOrders.cancelError'), 'error');
     } finally {
       setCancellingId(null);
     }
@@ -70,7 +104,7 @@ const CustomerOrdersPage = () => {
           ([OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING, OrderStatus.READY] as string[]).includes(o.status)
         );
       case 'livree':
-        return orders.filter(o => o.status === OrderStatus.DELIVERED);
+        return orders.filter(o => o.status === OrderStatus.COMPLETED);
       case 'annulee':
         return orders.filter(o => o.status === OrderStatus.CANCELLED);
       default:
@@ -162,8 +196,8 @@ const CustomerOrdersPage = () => {
               <div className="flex gap-4">
                 {/* Image */}
                 <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                  {order.platImageUrl ? (
-                    <img src={order.platImageUrl} alt={order.platName} className="w-full h-full object-cover" />
+                  {platDetails[order.platId]?.imageUrl ? (
+                    <img src={platDetails[order.platId].imageUrl!} alt={platDetails[order.platId]?.name || order.platName} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-3xl opacity-30">&#127869;</span>
@@ -174,7 +208,7 @@ const CustomerOrdersPage = () => {
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-gray-900 truncate">{order.platName}</h3>
+                    <h3 className="font-semibold text-gray-900 truncate">{platDetails[order.platId]?.name || order.platName}</h3>
                     <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
                       {getStatusLabel(order.status)}
                     </span>
@@ -197,17 +231,10 @@ const CustomerOrdersPage = () => {
                     </div>
                   )}
 
-                  {order.deliveryAddress && (
-                    <p className="text-xs text-gray-400 mt-1 truncate">
-                      <svg className="w-3 h-3 inline-block mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                      {order.deliveryAddress}
-                    </p>
-                  )}
-
                   {/* Cancel button for pending/confirmed orders */}
                   {(order.status === OrderStatus.PENDING || order.status === OrderStatus.CONFIRMED) && (
                     <button
-                      onClick={() => handleCancel(order.id)}
+                      onClick={() => handleCancelClick(order.id)}
                       disabled={cancellingId === order.id}
                       className="mt-3 px-4 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                     >
@@ -218,6 +245,52 @@ const CustomerOrdersPage = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setConfirmModal({ open: false, orderId: null })} />
+          <div className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-[scaleIn_0.2s_ease-out]">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-50 rounded-full">
+              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{t('customerOrders.cancelOrderTitle')}</h3>
+            <p className="text-sm text-gray-500 text-center mb-6">{t('customerOrders.cancelConfirm')}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmModal({ open: false, orderId: null })}
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-colors"
+              >
+                {t('customerOrders.cancelNo')}
+              </button>
+              <button
+                onClick={handleCancelConfirm}
+                className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl text-sm transition-colors"
+              >
+                {t('customerOrders.cancelYes')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-slide-in ${
+          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`}>
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {toast.type === 'success' ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            )}
+          </svg>
+          {toast.message}
         </div>
       )}
     </div>

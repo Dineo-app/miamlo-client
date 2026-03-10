@@ -5,7 +5,7 @@ export const OrderStatus = {
   CONFIRMED: 'CONFIRMED',
   PREPARING: 'PREPARING',
   READY: 'READY',
-  DELIVERED: 'DELIVERED',
+  COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
 } as const;
 
