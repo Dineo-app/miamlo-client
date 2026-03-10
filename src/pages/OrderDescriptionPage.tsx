@@ -9,7 +9,7 @@ import type { CartItem } from '@/services/cartService';
 const OrderDescriptionPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useSelector((state: RootState) => state.auth);
+  useSelector((state: RootState) => state.auth); // keep auth guard active
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [descriptions, setDescriptions] = useState<Record<string, string>>({});
   const [deliveryAddress, setDeliveryAddress] = useState('');
