@@ -1,18 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import orderService from '@/services/orderService';
 import { OrderStatus } from '@/services/orderService';
 import type { Order } from '@/services/orderService';
 
 type OrderTab = 'enCours' | 'livree' | 'annulee';
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'En attente',
-  CONFIRMED: 'Confirm\u00e9e',
-  PREPARING: 'En pr\u00e9paration',
-  READY: 'Pr\u00eate',
-  DELIVERED: 'Livr\u00e9e',
-  CANCELLED: 'Annul\u00e9e',
-};
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -24,10 +16,23 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const CustomerOrdersPage = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<OrderTab>('enCours');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'PENDING': t('customerOrders.statusPending'),
+      'CONFIRMED': t('customerOrders.statusConfirmed'),
+      'PREPARING': t('customerOrders.statusInPreparation'),
+      'READY': t('customerOrders.statusReady'),
+      'DELIVERED': t('customerOrders.statusDelivered'),
+      'CANCELLED': t('customerOrders.statusCancelled'),
+    };
+    return labels[status] || status;
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -46,13 +51,13 @@ const CustomerOrdersPage = () => {
   };
 
   const handleCancel = async (orderId: string) => {
-    if (!confirm('\u00cates-vous s\u00fbr de vouloir annuler cette commande ?')) return;
+    if (!confirm(t('customerOrders.cancelConfirm'))) return;
     try {
       setCancellingId(orderId);
       await orderService.cancelOrder(orderId);
       await fetchOrders();
     } catch {
-      alert('Impossible d\'annuler cette commande.');
+      alert(t('customerOrders.cancelError'));
     } finally {
       setCancellingId(null);
     }
@@ -76,9 +81,9 @@ const CustomerOrdersPage = () => {
   const filteredOrders = filterOrders(activeTab);
 
   const tabs: { id: OrderTab; label: string; color: string }[] = [
-    { id: 'enCours', label: 'En cours', color: '#ffdd00' },
-    { id: 'livree', label: 'Livr\u00e9es', color: '#22C55E' },
-    { id: 'annulee', label: 'Annul\u00e9es', color: '#EF4444' },
+    { id: 'enCours', label: t('customerOrders.tabActive'), color: '#ffdd00' },
+    { id: 'livree', label: t('customerOrders.tabCompleted'), color: '#22C55E' },
+    { id: 'annulee', label: t('customerOrders.tabCancelled'), color: '#EF4444' },
   ];
 
   const formatDate = (dateStr: string) => {
@@ -118,7 +123,7 @@ const CustomerOrdersPage = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-        Mes Commandes
+        {t('customerOrders.title')}
       </h1>
 
       {/* Tabs */}
@@ -148,7 +153,7 @@ const CustomerOrdersPage = () => {
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="text-gray-500 font-medium">Aucune commande dans cette cat&eacute;gorie</p>
+          <p className="text-gray-500 font-medium">{t('customerOrders.empty')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -171,7 +176,7 @@ const CustomerOrdersPage = () => {
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-gray-900 truncate">{order.platName}</h3>
                     <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                      {STATUS_LABELS[order.status] || order.status}
+                      {getStatusLabel(order.status)}
                     </span>
                   </div>
 
@@ -187,7 +192,7 @@ const CustomerOrdersPage = () => {
                   {order.description && (
                     <div className="mt-2 px-3 py-2 bg-orange-50 rounded-lg border border-orange-100">
                       <p className="text-xs text-orange-700">
-                        <span className="font-semibold">Instructions : </span>{order.description}
+                        <span className="font-semibold">{t('customerOrders.instructions')} : </span>{order.description}
                       </p>
                     </div>
                   )}
@@ -206,7 +211,7 @@ const CustomerOrdersPage = () => {
                       disabled={cancellingId === order.id}
                       className="mt-3 px-4 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                     >
-                      {cancellingId === order.id ? 'Annulation...' : 'Annuler la commande'}
+                      {cancellingId === order.id ? t('customerOrders.cancelling') : t('customerOrders.cancelOrder')}
                     </button>
                   )}
                 </div>

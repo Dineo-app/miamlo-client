@@ -38,6 +38,13 @@ const Navbar = () => {
       }
     };
     fetchCounts();
+
+    // Refresh cart count when items are added from other pages
+    const onCartUpdated = () => {
+      cartService.getCartCount().then(setCartCount).catch(() => {});
+    };
+    window.addEventListener('cartUpdated', onCartUpdated);
+    return () => window.removeEventListener('cartUpdated', onCartUpdated);
   }, [isCustomer]);
   
   const navigation = [
@@ -154,7 +161,7 @@ const Navbar = () => {
               <button
                 onClick={() => navigate('/customer/favorites')}
                 className="relative p-2 rounded-full hover:bg-black/5 transition-colors"
-                title="Mes favoris"
+                title={t('navbar.myFavorites')}
               >
                 <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -168,7 +175,7 @@ const Navbar = () => {
               <button
                 onClick={() => navigate('/customer/cart')}
                 className="relative p-2 rounded-full hover:bg-black/5 transition-colors"
-                title="Mon panier"
+                title={t('navbar.myCart')}
               >
                 <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -186,7 +193,7 @@ const Navbar = () => {
             onClick={() => navigate('/plats')}
             className="px-5 py-2.5 text-[0.9rem] font-semibold rounded-full border border-black/20 bg-white/85 hover:bg-white transition-all"
           >
-            Télécharger l'application
+            {t('navbar.downloadApp')}
           </button>
 
           {isAuthenticated && user ? (
@@ -217,7 +224,7 @@ const Navbar = () => {
                       className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900 first:rounded-t-lg`}
                       style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
                     >
-                      👤 Mon Profil
+                      👤 {t('navbar.myProfile')}
                     </button>
                   )}
                 </MenuItem>
@@ -228,7 +235,7 @@ const Navbar = () => {
                       className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900`}
                       style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
                     >
-                      📊 Tableau de bord
+                      📊 {t('navbar.dashboard')}
                     </button>
                   )}
                 </MenuItem>
@@ -240,7 +247,7 @@ const Navbar = () => {
                       className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 last:rounded-b-lg`}
                       style={{ backgroundColor: active ? '#fee2e2' : 'white', border: 'none' }}
                     >
-                      🚪 Déconnexion
+                      🚪 {t('navbar.logout')}
                     </button>
                   )}
                 </MenuItem>
@@ -260,7 +267,7 @@ const Navbar = () => {
                 e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
               }}
             >
-              Connexion / S'inscrire
+              {t('navbar.loginRegister')}
             </button>
           )}
         </div>
@@ -335,7 +342,7 @@ const Navbar = () => {
                   onClick={() => { navigate('/plats'); setMobileMenuOpen(false); }}
                   className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg border border-black/20 bg-white hover:bg-gray-50"
                 >
-                  Télécharger l'application
+                  {t('navbar.downloadApp')}
                 </button>
                 {isAuthenticated && user ? (
                   <>
@@ -345,7 +352,7 @@ const Navbar = () => {
                           onClick={() => { navigate('/customer/favorites'); setMobileMenuOpen(false); }}
                           className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
                         >
-                          <span>❤️ Mes Favoris</span>
+                          <span>❤️ {t('navbar.myFavorites')}</span>
                           {favoritesCount > 0 && (
                             <span className="bg-red-500 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full px-1">
                               {favoritesCount}
@@ -356,7 +363,7 @@ const Navbar = () => {
                           onClick={() => { navigate('/customer/cart'); setMobileMenuOpen(false); }}
                           className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
                         >
-                          <span>🛒 Mon Panier</span>
+                          <span>🛒 {t('navbar.myCart')}</span>
                           {cartCount > 0 && (
                             <span className="bg-red-500 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full px-1">
                               {cartCount}
@@ -369,19 +376,19 @@ const Navbar = () => {
                       onClick={() => { navigate(routes.profile); setMobileMenuOpen(false); }}
                       className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
                     >
-                      👤 Mon Profil
+                      👤 {t('navbar.myProfile')}
                     </button>
                     <button
                       onClick={() => { navigate(routes.dashboard); setMobileMenuOpen(false); }}
                       className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
                     >
-                      📊 Tableau de bord
+                      📊 {t('navbar.dashboard')}
                     </button>
                     <button
                       onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                       className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
                     >
-                      🚪 Déconnexion
+                      🚪 {t('navbar.logout')}
                     </button>
                   </>
                 ) : (
@@ -389,7 +396,7 @@ const Navbar = () => {
                     onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
                     className="w-full text-left px-3 py-2 text-base font-semibold bg-black text-white rounded-lg hover:bg-gray-800"
                   >
-                    Connexion / S'inscrire
+                    {t('navbar.loginRegister')}
                   </button>
                 )}
               </div>

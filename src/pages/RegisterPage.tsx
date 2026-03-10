@@ -114,7 +114,7 @@ const RegisterPage = () => {
               {t('register.title')}
             </h2>
             <p className="text-gray-600">
-              {step === 'form' ? t('register.subtitle') : 'Entrez le code reçu par SMS'}
+              {step === 'form' ? t('register.subtitle') : t('register.otpSubtitle')}
             </p>
           </div>
 
@@ -215,7 +215,7 @@ const RegisterPage = () => {
               className="w-full bg-[#ffdd00] text-black font-semibold py-3 px-4 rounded-lg hover:bg-[#ffd700] transition-colors duration-200 text-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50"
               style={{ border: 'none', outline: 'none' }}
             >
-              {loading ? 'Envoi en cours...' : t('register.registerButton')}
+              {loading ? t('register.sending') : t('register.registerButton')}
             </button>
 
             {/* Login Link */}
@@ -232,7 +232,7 @@ const RegisterPage = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div>
                 <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                  Code de vérification
+                  {t('register.otpLabel')}
                 </label>
                 <input
                   type="text"
@@ -252,7 +252,7 @@ const RegisterPage = () => {
                 className="w-full bg-[#ffdd00] text-black font-semibold py-3 px-4 rounded-lg hover:bg-[#ffd700] transition-colors duration-200 text-lg border-0 outline-none focus:outline-none disabled:opacity-50"
                 style={{ border: 'none', outline: 'none' }}
               >
-                {loading ? 'Vérification...' : "S'inscrire"}
+                {loading ? t('register.verifying') : t('register.signUp')}
               </button>
 
               <div className="flex flex-col gap-2">
@@ -262,14 +262,14 @@ const RegisterPage = () => {
                   disabled={loading}
                   className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
-                  Renvoyer le code
+                  {t('register.resendCode')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setStep('form'); setOtp(''); }}
                   className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
-                  ← Modifier les informations
+                  ← {t('register.changeInfo')}
                 </button>
               </div>
             </form>

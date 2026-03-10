@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import favoritesService from '@/services/favoritesService';
 import type { FavoritePlatWithDetails, FavoriteChefWithDetails } from '@/services/favoritesService';
 
@@ -11,6 +12,7 @@ interface Props {
 
 const CustomerFavoritesPage = ({ onCountChange }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<FavTab>('plats');
   const [favPlats, setFavPlats] = useState<FavoritePlatWithDetails[]>([]);
   const [favChefs, setFavChefs] = useState<FavoriteChefWithDetails[]>([]);
@@ -46,7 +48,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
         return updated;
       });
     } catch {
-      alert('Erreur lors de la suppression du favori.');
+      alert(t('customerFavorites.removeError'));
     }
   };
 
@@ -59,7 +61,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
         return updated;
       });
     } catch {
-      alert('Erreur lors de la suppression du favori.');
+      alert(t('customerFavorites.removeError'));
     }
   };
 
@@ -97,7 +99,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-        Mes Favoris
+        {t('customerFavorites.title')}
       </h1>
 
       {/* Tabs */}
@@ -110,7 +112,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
               activeTab === tab ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            {tab === 'plats' ? `Plats (${favPlats.length})` : `Chefs (${favChefs.length})`}
+            {tab === 'plats' ? `${t('customerFavorites.tabPlats')} (${favPlats.length})` : `${t('customerFavorites.tabChefs')} (${favChefs.length})`}
             {activeTab === tab && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffdd00] rounded-full" />
             )}
@@ -125,9 +127,9 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <p className="text-gray-500 font-medium mb-4">Aucun plat en favori</p>
+            <p className="text-gray-500 font-medium mb-4">{t('customerFavorites.emptyPlats')}</p>
             <button onClick={() => navigate('/plats')} className="px-6 py-2.5 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-semibold rounded-full text-sm transition-colors">
-              D&eacute;couvrir les plats
+              {t('customerFavorites.discoverPlats')}
             </button>
           </div>
         ) : (
@@ -169,7 +171,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
                       {fav.name}
                     </h3>
                     <p className="text-xs text-gray-500 mb-2">
-                      par {fav.chefFirstName} {fav.chefLastName}
+                      {t('customerFavorites.by')} {fav.chefFirstName} {fav.chefLastName}
                     </p>
                     <div className="flex items-center gap-2 mb-2">
                       {renderStars(fav.averageRating ?? 0)}
@@ -206,9 +208,9 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <p className="text-gray-500 font-medium mb-4">Aucun chef en favori</p>
+            <p className="text-gray-500 font-medium mb-4">{t('customerFavorites.emptyChefs')}</p>
             <button onClick={() => navigate('/chefs')} className="px-6 py-2.5 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-semibold rounded-full text-sm transition-colors">
-              D&eacute;couvrir les chefs
+              {t('customerFavorites.discoverChefs')}
             </button>
           </div>
         ) : (
@@ -265,7 +267,7 @@ const CustomerFavoritesPage = ({ onCountChange }: Props) => {
                       </span>
                     </div>
                     <span className="text-xs text-gray-400">
-                      {fav.totalReviews ?? 0} avis
+                      {fav.totalReviews ?? 0} {t('customerFavorites.reviews')}
                     </span>
                   </div>
                   {fav.description && (

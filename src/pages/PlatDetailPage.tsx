@@ -6,6 +6,7 @@ import type { RootState } from '@/store';
 import axios from 'axios';
 import cartService from '@/services/cartService';
 import favoritesService from '@/services/favoritesService';
+import reviewService from '@/services/reviewService';
 import IngredientSelectionModal from '@/components/IngredientSelectionModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
@@ -84,6 +85,17 @@ const PlatDetailPage = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Review form state
+  const [hasUserReviewed, setHasUserReviewed] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [hoverRating, setHoverRating] = useState(0);
 
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
@@ -129,11 +141,14 @@ const PlatDetailPage = () => {
     fetchData();
   }, [platId, t]);
 
-  // Check if plat is favorited
+  // Check if plat is favorited + if user already reviewed
   useEffect(() => {
     if (!isCustomer || !platId) return;
     favoritesService.checkFavoritePlat(platId)
       .then(result => setIsFavorite(result))
+      .catch(() => {});
+    reviewService.hasUserReviewedPlat(platId)
+      .then(result => setHasUserReviewed(result))
       .catch(() => {});
   }, [isCustomer, platId]);
 
@@ -180,6 +195,24 @@ const PlatDetailPage = () => {
     setIngredientModalOpen(true);
   };
 
+  const handleSubmitReview = async () => {
+    if (!platId || !reviewText.trim()) return;
+    setSubmittingReview(true);
+    setReviewError('');
+    try {
+      const newReview = await reviewService.addPlatReview(platId, reviewText.trim(), reviewRating);
+      setReviews(prev => [newReview, ...prev]);
+      setHasUserReviewed(true);
+      setShowReviewForm(false);
+      setReviewText('');
+      setReviewRating(5);
+    } catch {
+      setReviewError(t('reviews.errorSubmit'));
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const toggleFavorite = async () => {
     if (!isAuthenticated) { navigate('/login'); return; }
     if (!isCustomer || !platId) return;
@@ -206,6 +239,12 @@ const PlatDetailPage = () => {
       });
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 3000);
+      // Notify Navbar / Dashboard to refresh cart count
+      window.dispatchEvent(new Event('cartUpdated'));
+      // Show toast
+      setToastMessage(t('platDetail.addedToCart'));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (e) {
       console.error('Error adding to cart', e);
     } finally {
@@ -314,7 +353,7 @@ const PlatDetailPage = () => {
           <button
             onClick={toggleFavorite}
             className={`absolute ${hasPromo ? 'top-14 sm:top-16' : 'top-4 sm:top-5'} right-4 sm:right-5 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform`}
-            title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            title={isFavorite ? t('platDetail.removeFromFavorites') : t('platDetail.addToFavorites')}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill={isFavorite ? '#EF4444' : 'none'} stroke={isFavorite ? '#EF4444' : '#9CA3AF'} strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -471,6 +510,108 @@ const PlatDetailPage = () => {
             </span>
           </div>
 
+          {/* Review form / Write review button */}
+          {isCustomer && !hasUserReviewed && (
+            !showReviewForm ? (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="w-full mb-5 py-3 border-2 border-dashed border-[#ffd60a] rounded-xl text-sm font-semibold text-[#b8960a] hover:bg-[#ffd60a]/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                {t('reviews.writeReview')}
+              </button>
+            ) : (
+              <div className="mb-5 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <h4 className="text-sm font-bold text-gray-800 mb-3">{t('reviews.yourReview')}</h4>
+                {/* Star rating selector */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="p-0.5 transition-transform hover:scale-110"
+                    >
+                      <svg
+                        className={`w-7 h-7 transition-colors ${
+                          star <= (hoverRating || reviewRating)
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-gray-200 fill-gray-200'
+                        }`}
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-gray-500 font-medium">{hoverRating || reviewRating}/5</span>
+                </div>
+                {/* Review text */}
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder={t('reviews.placeholder')}
+                  maxLength={1000}
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-[#ffd60a] focus:ring-1 focus:ring-[#ffd60a] resize-none transition-colors"
+                />
+                <div className="flex items-center justify-between mt-1 mb-3">
+                  <span className="text-[11px] text-gray-400">{reviewText.length}/1000</span>
+                </div>
+                {reviewError && (
+                  <p className="text-sm text-red-500 mb-3">{reviewError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSubmitReview}
+                    disabled={submittingReview || !reviewText.trim()}
+                    className="flex-1 py-2.5 bg-[#ffd60a] hover:bg-[#ffcc00] disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    {submittingReview ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        {t('reviews.submitting')}
+                      </>
+                    ) : (
+                      t('reviews.submit')
+                    )}
+                  </button>
+                  <button
+                    onClick={() => { setShowReviewForm(false); setReviewError(''); }}
+                    className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium rounded-lg text-sm transition-colors"
+                  >
+                    {t('reviews.cancel')}
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+
+          {isCustomer && hasUserReviewed && (
+            <div className="mb-5 px-4 py-3 bg-green-50 border border-green-100 rounded-xl flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-sm text-green-700 font-medium">{t('reviews.alreadyReviewed')}</span>
+            </div>
+          )}
+
+          {!isAuthenticated && (
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full mb-5 py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              {t('reviews.loginToReview')}
+            </button>
+          )}
+
           {reviews.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <span className="text-5xl mb-4">💬</span>
@@ -523,26 +664,43 @@ const PlatDetailPage = () => {
             {addingToCart ? (
               <>
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Ajout en cours...
+                {t('platDetail.adding')}
               </>
             ) : addedToCart ? (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Ajout&eacute; au panier !
+                {t('platDetail.addedToCart')}
               </>
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
                 </svg>
-                Ajouter au panier
+                {t('platDetail.addToCart')}
               </>
             )}
           </button>
         </div>
       </main>
+
+      {/* Success Toast */}
+      {showToast && (
+        <div className="fixed top-6 right-6 z-50 animate-slide-in">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-xl shadow-[0_10px_25px_rgba(34,197,94,0.4)] flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-sm">{toastMessage}</p>
+              <p className="text-xs opacity-90">{plat?.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Ingredient modal */}
       {plat && (

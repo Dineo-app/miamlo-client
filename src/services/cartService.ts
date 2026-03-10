@@ -30,7 +30,11 @@ export interface AddToCartRequest {
 const cartService = {
   async getCartItems(): Promise<CartItem[]> {
     const response = await api.get('/cart');
-    return response.data?.data || response.data || [];
+    const payload = response.data?.data || response.data;
+    // Backend returns CartSummaryResponse { items, totalItems, subtotal, total }
+    if (payload && Array.isArray(payload.items)) return payload.items;
+    if (Array.isArray(payload)) return payload;
+    return [];
   },
 
   async getCartCount(): Promise<number> {

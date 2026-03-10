@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import cartService from '@/services/cartService';
 import type { CartItem } from '@/services/cartService';
 
@@ -9,6 +10,7 @@ interface Props {
 
 const CustomerCartPage = ({ onCountChange }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -44,7 +46,7 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
       await cartService.updateQuantity(item.id, newQuantity);
     } catch {
       setCartItems(oldItems);
-      alert('Erreur lors de la mise \u00e0 jour.');
+      alert(t('customerCart.updateError'));
     } finally {
       setUpdatingId(null);
     }
@@ -60,21 +62,23 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
 
     try {
       await cartService.removeFromCart(itemId);
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch {
       setCartItems(oldItems);
       onCountChange?.(oldItems.length);
-      alert('Erreur lors de la suppression.');
+      alert(t('customerCart.removeError'));
     }
   }, [cartItems, onCountChange]);
 
   const handleClearCart = async () => {
-    if (!confirm('Voulez-vous vider tout le panier ?')) return;
+    if (!confirm(t('customerCart.confirmClear'))) return;
     try {
       await cartService.clearCart();
       setCartItems([]);
       onCountChange?.(0);
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch {
-      alert('Erreur lors du vidage du panier.');
+      alert(t('customerCart.clearError'));
     }
   };
 
@@ -110,11 +114,17 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          Mon Panier
+          {t('customerCart.title')}
         </h1>
         {cartItems.length > 0 && (
-          <button onClick={handleClearCart} className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
-            Vider le panier
+          <button
+            onClick={handleClearCart}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-500 font-medium transition-colors group"
+          >
+            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {t('customerCart.clear')}
           </button>
         )}
       </div>
@@ -124,13 +134,13 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
           <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
           </svg>
-          <p className="text-gray-500 font-medium mb-2">Votre panier est vide</p>
-          <p className="text-sm text-gray-400 mb-6">Ajoutez des plats d&eacute;licieux &agrave; votre panier</p>
+          <p className="text-gray-500 font-medium mb-2">{t('customerCart.empty')}</p>
+          <p className="text-sm text-gray-400 mb-6">{t('customerCart.emptySubtitle')}</p>
           <button
             onClick={() => navigate('/plats')}
             className="px-6 py-2.5 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-semibold rounded-full text-sm transition-colors"
           >
-            D&eacute;couvrir les plats
+            {t('customerCart.browsePlats')}
           </button>
         </div>
       ) : (
@@ -165,7 +175,7 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
                       </button>
                     </div>
 
-                    <p className="text-sm text-gray-500 mt-0.5">{item.platPrice.toFixed(2)} &euro; / unit&eacute;</p>
+                    <p className="text-sm text-gray-500 mt-0.5">{item.platPrice.toFixed(2)} € {t('customerCart.perUnit')}</p>
 
                     {/* Promotion badge */}
                     {item.promotion?.isActive && item.promotion.reductionValue > 0 && (
@@ -175,10 +185,16 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
                     )}
 
                     {/* Selected ingredients */}
-                    {item.selectedIngredients && item.selectedIngredients.length > 0 && (
-                      <p className="text-xs text-gray-400 mt-1 truncate">
-                        + {item.selectedIngredients.map(ing => ing.ingredientName).join(', ')}
-                      </p>
+                    {item.selectedIngredients && item.selectedIngredients.filter(ing => ing.ingredientName).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {item.selectedIngredients.filter(ing => ing.ingredientName).map((ing, idx) => (
+                          <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-[11px] font-medium rounded-full border border-amber-100">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            {ing.ingredientName}
+                            {ing.ingredientPrice > 0 && <span className="text-amber-500">+{ing.ingredientPrice.toFixed(2)}€</span>}
+                          </span>
+                        ))}
+                      </div>
                     )}
 
                     {/* Quantity controls + Price */}
@@ -211,14 +227,14 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
           {/* Order summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-[80px]">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">R&eacute;capitulatif</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-4">{t('customerCart.summary')}</h2>
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Sous-total ({cartItems.length} article{cartItems.length > 1 ? 's' : ''})</span>
+                  <span className="text-gray-500">{t('customerCart.subtotal', { count: cartItems.length })}</span>
                   <span className="font-medium text-gray-900">{subtotal.toFixed(2)} &euro;</span>
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between">
-                  <span className="font-bold text-gray-900">Total</span>
+                  <span className="font-bold text-gray-900">{t('customerCart.total')}</span>
                   <span className="text-xl font-bold text-gray-900">{total.toFixed(2)} &euro;</span>
                 </div>
               </div>
@@ -226,7 +242,7 @@ const CustomerCartPage = ({ onCountChange }: Props) => {
                 onClick={handleProceed}
                 className="w-full py-3.5 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-bold rounded-xl transition-colors"
               >
-                Passer la commande
+                {t('customerCart.order')}
               </button>
             </div>
           </div>

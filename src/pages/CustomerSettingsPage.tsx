@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store/types';
 import profileService from '@/services/profileService';
@@ -6,6 +7,7 @@ import { storeUserData } from '@/services/passwordlessAuthService';
 import { RESTORE_AUTH } from '@/store/types/actionTypes';
 
 const CustomerSettingsPage = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -21,10 +23,10 @@ const CustomerSettingsPage = () => {
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
-    if (!firstName.trim()) errs.firstName = 'Le pr\u00e9nom est requis';
-    if (!lastName.trim()) errs.lastName = 'Le nom est requis';
-    if (!email.trim()) errs.email = 'L\'email est requis';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Email invalide';
+    if (!firstName.trim()) errs.firstName = t('customerSettings.firstNameRequired');
+    if (!lastName.trim()) errs.lastName = t('customerSettings.lastNameRequired');
+    if (!email.trim()) errs.email = t('customerSettings.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('customerSettings.emailInvalid');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -59,7 +61,7 @@ const CustomerSettingsPage = () => {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de la mise \u00e0 jour du profil.');
+      setError(err.response?.data?.message || t('customerSettings.updateError'));
     } finally {
       setSaving(false);
     }
@@ -68,14 +70,14 @@ const CustomerSettingsPage = () => {
   return (
     <div className="space-y-6 max-w-xl">
       <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-        Param&egrave;tres du compte
+        {t('customerSettings.title')}
       </h1>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-sm space-y-5">
         {/* Success */}
         {success && (
           <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
-            Profil mis &agrave; jour avec succ&egrave;s !
+            {t('customerSettings.updateSuccess')}
           </div>
         )}
 
@@ -88,7 +90,7 @@ const CustomerSettingsPage = () => {
 
         {/* First name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Pr&eacute;nom</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('customerSettings.firstName')}</label>
           <input
             type="text"
             value={firstName}
@@ -100,7 +102,7 @@ const CustomerSettingsPage = () => {
 
         {/* Last name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('customerSettings.lastName')}</label>
           <input
             type="text"
             value={lastName}
@@ -112,7 +114,7 @@ const CustomerSettingsPage = () => {
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('customerSettings.email')}</label>
           <input
             type="email"
             value={email}
@@ -124,24 +126,24 @@ const CustomerSettingsPage = () => {
 
         {/* Phone (read-only) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">T&eacute;l&eacute;phone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('customerSettings.phone')}</label>
           <input
             type="text"
             value={user?.phone || ''}
             readOnly
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
           />
-          <p className="text-xs text-gray-400 mt-1">Le num&eacute;ro de t&eacute;l&eacute;phone ne peut pas &ecirc;tre modifi&eacute;</p>
+          <p className="text-xs text-gray-400 mt-1">{t('customerSettings.phoneReadOnly')}</p>
         </div>
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Adresse</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('customerSettings.address')}</label>
           <input
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Votre adresse de livraison"
+            placeholder={t('customerSettings.addressPlaceholder')}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#ffdd00] focus:ring-1 focus:ring-[#ffdd00] outline-none transition-colors"
           />
         </div>
@@ -152,7 +154,7 @@ const CustomerSettingsPage = () => {
           disabled={saving}
           className="w-full py-3 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-bold rounded-xl transition-colors disabled:opacity-50"
         >
-          {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          {saving ? t('customerSettings.saving') : t('customerSettings.saveChanges')}
         </button>
       </form>
     </div>

@@ -1,22 +1,52 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import type { RootState } from '@/store/types';
 import cartService from '@/services/cartService';
 import type { CartItem } from '@/services/cartService';
 
 const OrderDescriptionPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [descriptions, setDescriptions] = useState<Record<string, string>>({});
-  const [deliveryAddress, setDeliveryAddress] = useState(user?.address || '');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [loading, setLoading] = useState(true);
-  const [detectingLocation, setDetectingLocation] = useState(false);
 
   useEffect(() => {
     loadCartItems();
+    detectLocation();
   }, []);
+
+  // Auto-detect user position on mount (same as mobile app)
+  const detectLocation = () => {
+    // First check if we have a saved location in localStorage
+    const saved = localStorage.getItem('miamlo_user_location');
+    if (saved) {
+      try {
+        const { lat, lng } = JSON.parse(saved);
+        if (lat && lng) {
+          setDeliveryAddress(`${lat}, ${lng}`);
+          return;
+        }
+      } catch { /* continue to geolocation */ }
+    }
+
+    // Otherwise auto-detect via browser geolocation
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setDeliveryAddress(`${latitude}, ${longitude}`);
+        localStorage.setItem('miamlo_user_location', JSON.stringify({ lat: latitude, lng: longitude, ts: Date.now() }));
+      },
+      () => { /* silently fail */ },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
 
   const loadCartItems = async () => {
     try {
@@ -34,37 +64,6 @@ const OrderDescriptionPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      alert('La g\u00e9olocalisation n\'est pas support\u00e9e par votre navigateur.');
-      return;
-    }
-    setDetectingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          // Use Nominatim for reverse geocoding
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-          );
-          const data = await res.json();
-          if (data.display_name) {
-            setDeliveryAddress(data.display_name);
-          }
-        } catch {
-          alert('Impossible de d\u00e9tecter votre adresse.');
-        } finally {
-          setDetectingLocation(false);
-        }
-      },
-      () => {
-        alert('Impossible d\'obtenir votre position.');
-        setDetectingLocation(false);
-      }
-    );
   };
 
   const handleProceedToPayment = () => {
@@ -88,12 +87,12 @@ const OrderDescriptionPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#f9f6ef' }}>
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Votre panier est vide</p>
+          <p className="text-gray-500 mb-4">{t('orderDescription.emptyCart')}</p>
           <button
             onClick={() => navigate('/customer/cart')}
             className="px-6 py-2.5 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-semibold rounded-full text-sm transition-colors"
           >
-            Retour au panier
+            {t('orderDescription.backToCart')}
           </button>
         </div>
       </div>
@@ -113,45 +112,16 @@ const OrderDescriptionPage = () => {
             </svg>
           </button>
           <h1 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            D&eacute;tails de la commande
+            {t('orderDescription.title')}
           </h1>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Delivery address */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">Adresse de livraison</h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={deliveryAddress}
-              onChange={(e) => setDeliveryAddress(e.target.value)}
-              placeholder="Votre adresse de livraison"
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#ffdd00] focus:ring-1 focus:ring-[#ffdd00] outline-none transition-colors text-sm"
-            />
-            <button
-              onClick={handleDetectLocation}
-              disabled={detectingLocation}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {detectingLocation ? (
-                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              )}
-              <span className="hidden sm:inline">D&eacute;tecter</span>
-            </button>
-          </div>
-        </div>
-
         {/* Per-item instructions */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-1">Instructions sp&eacute;ciales</h2>
-          <p className="text-xs text-gray-400 mb-4">Ajoutez des instructions pour chaque plat (allergies, pr&eacute;f&eacute;rences, etc.)</p>
+          <h2 className="text-base font-bold text-gray-900 mb-1">{t('orderDescription.instructions')}</h2>
+          <p className="text-xs text-gray-400 mb-4">{t('orderDescription.instructionsSubtitle')}</p>
 
           <div className="space-y-4">
             {cartItems.map(item => (
@@ -165,10 +135,21 @@ const OrderDescriptionPage = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-800 mb-1">{item.platName} <span className="text-gray-400">x{item.quantity}</span></p>
+                  {/* Show selected ingredients */}
+                  {item.selectedIngredients && item.selectedIngredients.filter(ing => ing.ingredientName).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {item.selectedIngredients.filter(ing => ing.ingredientName).map((ing, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-medium rounded-full border border-amber-100">
+                          {ing.ingredientName}
+                          {ing.ingredientPrice > 0 && <span className="text-amber-500">+{ing.ingredientPrice.toFixed(2)}€</span>}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <textarea
                     value={descriptions[item.id] || ''}
                     onChange={(e) => setDescriptions(prev => ({ ...prev, [item.id]: e.target.value }))}
-                    placeholder="Ex: Sans oignons, bien cuit..."
+                    placeholder={t('orderDescription.instructionsPlaceholder')}
                     rows={2}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-[#ffdd00] focus:ring-1 focus:ring-[#ffdd00] outline-none text-sm resize-none transition-colors"
                   />
@@ -181,7 +162,7 @@ const OrderDescriptionPage = () => {
         {/* Summary */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <span className="font-bold text-gray-900">Total</span>
+            <span className="font-bold text-gray-900">{t('orderDescription.total')}</span>
             <span className="text-xl font-bold text-gray-900">{total.toFixed(2)} &euro;</span>
           </div>
           <button
@@ -191,7 +172,7 @@ const OrderDescriptionPage = () => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            Proc&eacute;der au paiement
+            {t('orderDescription.proceedToPayment')}
           </button>
         </div>
       </main>

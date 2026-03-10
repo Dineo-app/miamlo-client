@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -23,6 +24,7 @@ const CheckoutForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [cardComplete, setCardComplete] = useState(false);
@@ -41,7 +43,7 @@ const CheckoutForm = ({
       });
 
       if (stripeError) {
-        setError(stripeError.message || 'Erreur de paiement');
+        setError(stripeError.message || t('payment.paymentError'));
         setProcessing(false);
         return;
       }
@@ -87,7 +89,7 @@ const CheckoutForm = ({
         navigate('/customer/orders', { replace: true });
       }
     } catch {
-      setError('Une erreur est survenue lors du paiement.');
+      setError(t('payment.unexpectedError'));
     } finally {
       setProcessing(false);
     }
@@ -97,7 +99,7 @@ const CheckoutForm = ({
     <div className="space-y-6">
       {/* Card input */}
       <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-4">Carte bancaire</h2>
+        <h2 className="text-base font-bold text-gray-900 mb-4">{t('payment.bankCard')}</h2>
         <div className="border border-gray-200 rounded-xl p-4 focus-within:border-[#ffdd00] focus-within:ring-1 focus-within:ring-[#ffdd00] transition-colors">
           <CardElement
             options={{
@@ -128,11 +130,11 @@ const CheckoutForm = ({
       {/* Summary */}
       <div className="bg-white rounded-2xl p-5 shadow-sm">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-500">{cartItems.length} article{cartItems.length > 1 ? 's' : ''}</span>
+          <span className="text-sm text-gray-500">{t('payment.items', { count: cartItems.length })}</span>
           <span className="text-sm text-gray-500">{totalAmount.toFixed(2)} &euro;</span>
         </div>
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-          <span className="font-bold text-gray-900">Total</span>
+          <span className="font-bold text-gray-900">{t('payment.total')}</span>
           <span className="text-xl font-bold text-gray-900">{totalAmount.toFixed(2)} &euro;</span>
         </div>
       </div>
@@ -146,20 +148,20 @@ const CheckoutForm = ({
         {processing ? (
           <>
             <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-            Paiement en cours...
+            {t('payment.processing')}
           </>
         ) : (
           <>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            Payer {totalAmount.toFixed(2)} &euro;
+            {t('payment.pay')} {totalAmount.toFixed(2)} €
           </>
         )}
       </button>
 
       <p className="text-xs text-gray-400 text-center">
-        Paiement s&eacute;curis&eacute; par Stripe. Vos donn&eacute;es bancaires ne sont jamais stock&eacute;es.
+        {t('payment.securePayment')}
       </p>
     </div>
   );
@@ -169,6 +171,7 @@ const CheckoutForm = ({
 const PaymentPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState('');
   const [paymentIntentId, setPaymentIntentId] = useState('');
@@ -197,7 +200,7 @@ const PaymentPage = () => {
       setCartItems(items);
 
       if (items.length === 0) {
-        setError('Votre panier est vide.');
+        setError(t('payment.cartEmpty'));
         setLoading(false);
         return;
       }
@@ -207,7 +210,7 @@ const PaymentPage = () => {
       const response = await paymentService.createPaymentIntent({
         amount: Math.round(amount * 100), // cents
         currency: 'eur',
-        description: `Commande Miamlo - ${items.length} article(s)`,
+        description: t('payment.orderDescription', { count: items.length }),
         items: items.map((i) => ({
           platId: i.platId,
           platName: i.platName,
@@ -221,7 +224,7 @@ const PaymentPage = () => {
       setPaymentIntentId(response.paymentIntentId);
     } catch (e: unknown) {
       console.error('Payment init error', e);
-      setError('Impossible d\'initialiser le paiement. Veuillez r\u00e9essayer.');
+      setError(t('payment.initError'));
     } finally {
       setLoading(false);
     }
@@ -232,7 +235,7 @@ const PaymentPage = () => {
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#f9f6ef' }}>
         <div className="text-center space-y-3">
           <div className="w-10 h-10 border-3 border-[#ffdd00] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-gray-500">Pr&eacute;paration du paiement...</p>
+          <p className="text-sm text-gray-500">{t('payment.preparingPayment')}</p>
         </div>
       </div>
     );
@@ -253,13 +256,13 @@ const PaymentPage = () => {
               onClick={() => navigate(-1)}
               className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-full text-sm transition-colors"
             >
-              Retour
+              {t('payment.back')}
             </button>
             <button
               onClick={initPayment}
               className="px-5 py-2 bg-[#ffdd00] hover:bg-[#ffd000] text-black font-semibold rounded-full text-sm transition-colors"
             >
-              R&eacute;essayer
+              {t('payment.retry')}
             </button>
           </div>
         </div>
@@ -278,7 +281,7 @@ const PaymentPage = () => {
             </svg>
           </button>
           <h1 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Paiement
+            {t('payment.title')}
           </h1>
           <div className="ml-auto">
             <svg className="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
