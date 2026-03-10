@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/store';
 import axios from 'axios';
 import cartService from '@/services/cartService';
+import favoritesService from '@/services/favoritesService';
 import IngredientSelectionModal from '@/components/IngredientSelectionModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
@@ -82,8 +83,10 @@ const PlatDetailPage = () => {
   const [ingredientModalOpen, setIngredientModalOpen] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
 
   // SEO
   useEffect(() => {
@@ -126,6 +129,14 @@ const PlatDetailPage = () => {
     fetchData();
   }, [platId, t]);
 
+  // Check if plat is favorited
+  useEffect(() => {
+    if (!isCustomer || !platId) return;
+    favoritesService.checkFavoritePlat(platId)
+      .then(result => setIsFavorite(result))
+      .catch(() => {});
+  }, [isCustomer, platId]);
+
   // ─── Helpers ──────────────────────────────────────────────────────────────
   const formatDate = (dateStr: string) => {
     try {
@@ -167,6 +178,20 @@ const PlatDetailPage = () => {
       return;
     }
     setIngredientModalOpen(true);
+  };
+
+  const toggleFavorite = async () => {
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isCustomer || !platId) return;
+    try {
+      if (isFavorite) {
+        await favoritesService.removeFavoritePlat(platId);
+        setIsFavorite(false);
+      } else {
+        await favoritesService.addFavoritePlat(platId);
+        setIsFavorite(true);
+      }
+    } catch { /* ignore */ }
   };
 
   const handleIngredientConfirm = async (selectedIngredientIds: string[], quantity: number) => {
@@ -284,6 +309,17 @@ const PlatDetailPage = () => {
               <span className="text-sm font-bold text-white">-{plat.promotion!.reductionValue}%</span>
             </div>
           )}
+
+          {/* Favorite heart */}
+          <button
+            onClick={toggleFavorite}
+            className={`absolute ${hasPromo ? 'top-14 sm:top-16' : 'top-4 sm:top-5'} right-4 sm:right-5 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform`}
+            title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill={isFavorite ? '#EF4444' : 'none'} stroke={isFavorite ? '#EF4444' : '#9CA3AF'} strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
 
           {/* Price badge at bottom-right */}
           <div className="absolute bottom-5 right-5 sm:bottom-7 sm:right-7">

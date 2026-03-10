@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
+import favoritesService from '@/services/favoritesService';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
@@ -87,6 +90,8 @@ const PublicChefProfilePage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { chefId } = useParams<{ chefId: string }>();
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
 
   const [chef, setChef] = useState<PublicChefResponse | null>(null);
   const [plats, setPlats] = useState<PublicPlatResponse[]>([]);
@@ -94,6 +99,8 @@ const PublicChefProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'plats' | 'reviews'>('plats');
+  const [isChefFavorite, setIsChefFavorite] = useState(false);
+  const [favoritePlatIds, setFavoritePlatIds] = useState<string[]>([]);
 
   // SEO
   useEffect(() => {
@@ -140,6 +147,46 @@ const PublicChefProfilePage = () => {
 
     fetchData();
   }, [chefId, t]);
+
+  // Fetch favorites for logged-in customers
+  useEffect(() => {
+    if (!isCustomer || !chefId) return;
+    Promise.all([
+      favoritesService.checkFavoriteChef(chefId),
+      favoritesService.getFavoritePlats(),
+    ]).then(([isFav, favPlats]) => {
+      setIsChefFavorite(isFav);
+      setFavoritePlatIds(favPlats.map(f => f.platId));
+    }).catch(() => {});
+  }, [isCustomer, chefId]);
+
+  const toggleChefFavorite = async () => {
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isCustomer || !chefId) return;
+    try {
+      if (isChefFavorite) {
+        await favoritesService.removeFavoriteChef(chefId);
+        setIsChefFavorite(false);
+      } else {
+        await favoritesService.addFavoriteChef(chefId);
+        setIsChefFavorite(true);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const togglePlatFavorite = async (platId: string) => {
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isCustomer) return;
+    try {
+      if (favoritePlatIds.includes(platId)) {
+        await favoritesService.removeFavoritePlat(platId);
+        setFavoritePlatIds(prev => prev.filter(id => id !== platId));
+      } else {
+        await favoritesService.addFavoritePlat(platId);
+        setFavoritePlatIds(prev => [...prev, platId]);
+      }
+    } catch { /* ignore */ }
+  };
 
   // Helpers
   const formatDate = (dateStr: string) => {
@@ -274,6 +321,17 @@ const PublicChefProfilePage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             {t('chefProfile.back')}
+          </button>
+
+          {/* Favorite chef heart */}
+          <button
+            onClick={toggleChefFavorite}
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+            title={isChefFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill={isChefFavorite ? '#EF4444' : 'none'} stroke={isChefFavorite ? '#EF4444' : '#ffffff'} strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
           </button>
 
           {/* Chef info at bottom */}
@@ -414,6 +472,17 @@ const PublicChefProfilePage = () => {
                             <span className="text-xs font-bold text-white">-{plat.promotion!.reductionValue}%</span>
                           </div>
                         )}
+
+                        {/* Favorite heart */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); togglePlatFavorite(plat.id); }}
+                          className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+                          title={favoritePlatIds.includes(plat.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill={favoritePlatIds.includes(plat.id) ? '#EF4444' : 'none'} stroke={favoritePlatIds.includes(plat.id) ? '#EF4444' : '#9CA3AF'} strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </button>
                       </div>
 
                       {/* Content */}

@@ -2,36 +2,45 @@ import { api } from '@/store/api';
 
 export interface FavoritePlatWithDetails {
   favoriteId: string;
+  favoritedAt: string;
   platId: string;
-  platName: string;
-  platDescription: string;
-  platPrice: number;
-  platImageUrl: string | null;
-  platCategories: string[];
-  platEstimatedCookTime: number;
-  platAverageRating: number;
   chefId: string;
-  chefFirstName: string;
-  chefLastName: string;
+  name: string;
+  description: string;
+  estimatedCookTime: number;
+  categories: string[];
+  imageUrl: string | null;
+  platCreatedAt?: string;
+  platUpdatedAt?: string;
+  price?: number;
+  averageRating?: number;
+  chefFirstName?: string;
+  chefLastName?: string;
   promotion?: {
     id: string;
+    platId?: string;
     reductionValue: number;
+    reductionEnds?: string;
     isActive: boolean;
+    createdAt?: string;
+    updatedAt?: string;
   } | null;
-  createdAt: string;
 }
 
 export interface FavoriteChefWithDetails {
   favoriteId: string;
+  favoritedAt: string;
   chefId: string;
-  chefFirstName: string;
-  chefLastName: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  address?: string;
+  description: string | null;
+  categories: string[];
+  chefCertifications?: string[];
   chefCoverImg: string | null;
-  chefDescription: string | null;
-  chefCategories: string[];
-  chefAverageRating: number;
-  chefReviewCount: number;
-  createdAt: string;
+  averageRating: number;
+  totalReviews: number;
 }
 
 const favoritesService = {

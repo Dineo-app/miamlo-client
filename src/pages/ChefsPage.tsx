@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
+import favoritesService from '@/services/favoritesService';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
@@ -97,6 +100,8 @@ const IconArrowRight = () => (
 const ChefsPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
 
   // Location state — restore from localStorage
   const [locationStatus, setLocationStatus] = useState<'idle' | 'asking' | 'loading' | 'granted' | 'denied'>(() => {
@@ -133,6 +138,7 @@ const ChefsPage = () => {
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0); // 0-indexed for backend
+  const [favoriteChefIds, setFavoriteChefIds] = useState<string[]>([]);
   const pageSize = 12;
 
   // Refs
@@ -152,6 +158,28 @@ const ChefsPage = () => {
       document.head.appendChild(meta);
     }
   }, [t]);
+
+  // Fetch favorite chef IDs for logged-in customers
+  useEffect(() => {
+    if (!isCustomer) return;
+    favoritesService.getFavoriteChefs()
+      .then(favs => setFavoriteChefIds(favs.map(f => f.chefId)))
+      .catch(() => {});
+  }, [isCustomer]);
+
+  const toggleFavorite = async (chefId: string) => {
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isCustomer) return;
+    try {
+      if (favoriteChefIds.includes(chefId)) {
+        await favoritesService.removeFavoriteChef(chefId);
+        setFavoriteChefIds(prev => prev.filter(id => id !== chefId));
+      } else {
+        await favoritesService.addFavoriteChef(chefId);
+        setFavoriteChefIds(prev => [...prev, chefId]);
+      }
+    } catch { /* ignore */ }
+  };
 
   // Ask for location on mount (skip if restored)
   useEffect(() => {
@@ -358,6 +386,17 @@ const ChefsPage = () => {
             <span className="text-xs font-semibold text-gray-700">{chef.distanceKm.toFixed(1)} {t('chefs.distance')}</span>
           </div>
         )}
+
+        {/* Favorite heart */}
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleFavorite(chef.id); }}
+          className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+          title={favoriteChefIds.includes(chef.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill={favoriteChefIds.includes(chef.id) ? '#EF4444' : 'none'} stroke={favoriteChefIds.includes(chef.id) ? '#EF4444' : '#9CA3AF'} strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
       </div>
 
       {/* Content */}
