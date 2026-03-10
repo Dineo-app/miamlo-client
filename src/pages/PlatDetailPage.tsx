@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 import axios from 'axios';
+import cartService from '@/services/cartService';
+import IngredientSelectionModal from '@/components/IngredientSelectionModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
 
@@ -75,6 +79,11 @@ const PlatDetailPage = () => {
   const [reviews, setReviews] = useState<PlatReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ingredientModalOpen, setIngredientModalOpen] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   // SEO
   useEffect(() => {
@@ -150,6 +159,33 @@ const PlatDetailPage = () => {
       );
     }
     return <div className="flex items-center gap-0.5">{stars}</div>;
+  };
+
+  const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setIngredientModalOpen(true);
+  };
+
+  const handleIngredientConfirm = async (selectedIngredientIds: string[], quantity: number) => {
+    if (!plat) return;
+    setIngredientModalOpen(false);
+    setAddingToCart(true);
+    try {
+      await cartService.addToCart({
+        platId: plat.id,
+        quantity,
+        selectedIngredientIds,
+      });
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 3000);
+    } catch (e) {
+      console.error('Error adding to cart', e);
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   // ─── Loading ──────────────────────────────────────────────────────────────
@@ -436,7 +472,53 @@ const PlatDetailPage = () => {
             </div>
           )}
         </div>
+
+        {/* ── Add to cart button ──────────────────────────────────────────── */}
+        <div className="mt-6">
+          <button
+            onClick={handleAddToCart}
+            disabled={addingToCart}
+            className={`w-full py-4 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] ${
+              addedToCart
+                ? 'bg-green-500 text-white'
+                : 'bg-[#ffdd00] hover:bg-[#ffd000] text-black'
+            } disabled:opacity-50`}
+          >
+            {addingToCart ? (
+              <>
+                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                Ajout en cours...
+              </>
+            ) : addedToCart ? (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Ajout&eacute; au panier !
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                </svg>
+                Ajouter au panier
+              </>
+            )}
+          </button>
+        </div>
       </main>
+
+      {/* Ingredient modal */}
+      {plat && (
+        <IngredientSelectionModal
+          visible={ingredientModalOpen}
+          platId={plat.id}
+          platName={plat.name}
+          platPrice={discountedPrice ?? plat.price}
+          onClose={() => setIngredientModalOpen(false)}
+          onConfirm={handleIngredientConfirm}
+        />
+      )}
     </div>
   );
 };

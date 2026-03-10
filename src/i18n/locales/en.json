@@ -572,5 +572,83 @@
     "errorNotFound": "Dish not found",
     "errorLoading": "Unable to load dish details.",
     "errorDescription": "The dish you're looking for doesn't exist or is no longer available."
+  },
+  "customerDashboard": {
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "orders": "My Orders",
+    "favorites": "My Favorites",
+    "cart": "My Cart",
+    "settings": "Settings",
+    "logout": "Logout",
+    "totalOrders": "Orders",
+    "totalFavorites": "Favorites",
+    "cartItems": "Cart",
+    "explorePlats": "Discover dishes",
+    "exploreChefs": "Discover chefs",
+    "explorePromos": "View promotions"
+  },
+  "customerOrders": {
+    "title": "My Orders",
+    "inProgress": "In Progress",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "quantity": "Quantity",
+    "total": "Total",
+    "cancel": "Cancel",
+    "cancelConfirm": "Are you sure you want to cancel this order?",
+    "noOrders": "No orders",
+    "noOrdersDescription": "You haven't placed any orders in this category yet."
+  },
+  "customerFavorites": {
+    "title": "My Favorites",
+    "plats": "Dishes",
+    "chefs": "Chefs",
+    "remove": "Remove from favorites",
+    "noFavoritePlats": "No favorite dishes",
+    "noFavoriteChefs": "No favorite chefs",
+    "discoverPlats": "Discover dishes",
+    "discoverChefs": "Discover chefs"
+  },
+  "customerCart": {
+    "title": "My Cart",
+    "empty": "Your cart is empty",
+    "discoverPlats": "Discover dishes",
+    "orderSummary": "Summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Place order",
+    "clearCart": "Clear cart",
+    "clearConfirm": "Are you sure you want to clear your cart?"
+  },
+  "customerSettings": {
+    "title": "Profile settings",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "phoneReadonly": "Phone number cannot be changed",
+    "address": "Address",
+    "save": "Save",
+    "saved": "Profile updated successfully"
+  },
+  "orderDescription": {
+    "title": "Order Details",
+    "deliveryAddress": "Delivery Address",
+    "detectLocation": "Detect",
+    "specialInstructions": "Special Instructions",
+    "instructionsHelper": "Add instructions for each dish (allergies, preferences, etc.)",
+    "placeholder": "e.g., No onions, well done...",
+    "total": "Total",
+    "proceedToPayment": "Proceed to payment"
+  },
+  "payment": {
+    "title": "Payment",
+    "cardTitle": "Credit card",
+    "payButton": "Pay {{amount}} €",
+    "processing": "Processing payment...",
+    "secure": "Secure payment by Stripe. Your banking data is never stored.",
+    "error": "Payment error",
+    "retry": "Retry"
   }
 }
