@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
+import favoritesService from '@/services/favoritesService';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dineo-project-dineo-backend.gbrbu6.easypanel.host/api/v1';
@@ -137,6 +140,8 @@ const IconX = () => (
 const PlatsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
 
   // Location state — restore from localStorage if available
   const [locationStatus, setLocationStatus] = useState<'idle' | 'asking' | 'loading' | 'granted' | 'denied'>(() => {
@@ -188,6 +193,7 @@ const PlatsPage = () => {
   const [minRating, setMinRating] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [favoritePlatIds, setFavoritePlatIds] = useState<string[]>([]);
   const pageSize = 12;
 
   // Refs
@@ -207,6 +213,28 @@ const PlatsPage = () => {
       document.head.appendChild(meta);
     }
   }, [t]);
+
+  // Fetch favorite plat IDs for logged-in customers
+  useEffect(() => {
+    if (!isCustomer) return;
+    favoritesService.getFavoritePlats()
+      .then(favs => setFavoritePlatIds(favs.map(f => f.platId)))
+      .catch(() => {});
+  }, [isCustomer]);
+
+  const toggleFavorite = async (platId: string) => {
+    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isCustomer) return;
+    try {
+      if (favoritePlatIds.includes(platId)) {
+        await favoritesService.removeFavoritePlat(platId);
+        setFavoritePlatIds(prev => prev.filter(id => id !== platId));
+      } else {
+        await favoritesService.addFavoritePlat(platId);
+        setFavoritePlatIds(prev => [...prev, platId]);
+      }
+    } catch { /* ignore */ }
+  };
 
   // Ask for location on mount (skip if already restored from storage)
   useEffect(() => {
@@ -464,6 +492,17 @@ const PlatsPage = () => {
           <div className={`absolute top-3 right-3 rounded-full px-2.5 py-1 text-[10px] font-semibold shadow-sm ${plat.isChefOpen ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
             {plat.isChefOpen ? t('plats.chefOpen') : t('plats.chefClosed')}
           </div>
+
+          {/* Favorite heart */}
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(plat.id); }}
+            className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+            title={favoritePlatIds.includes(plat.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill={favoritePlatIds.includes(plat.id) ? '#EF4444' : 'none'} stroke={favoritePlatIds.includes(plat.id) ? '#EF4444' : '#9CA3AF'} strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
         </div>
 
         {/* Content */}

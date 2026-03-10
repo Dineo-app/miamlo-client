@@ -20,9 +20,10 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const CustomerDashboard = lazy(() => import('@/pages/CustomerDashboard'));
+const OrderDescriptionPage = lazy(() => import('@/pages/OrderDescriptionPage'));
+const PaymentPage = lazy(() => import('@/pages/PaymentPage'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
 const CreateChefPage = lazy(() => import('@/pages/CreateChefPage'));
-const CustomerProfilePage = lazy(() => import('@/pages/CustomerProfilePage'));
 const AdminProfilePage = lazy(() => import('@/pages/AdminProfilePage'));
 const ChefProfilePage = lazy(() => import('@/pages/ChefProfilePage'));
 const ChefDashboard = lazy(() => import('@/pages/ChefDashboard'));
@@ -115,6 +116,66 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/customer/orders',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <CustomerDashboard />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/customer/favorites',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <CustomerDashboard />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/customer/cart',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <CustomerDashboard />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/customer/settings',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <CustomerDashboard />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/customer/order-description',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <OrderDescriptionPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
+    path: '/customer/payment',
+    element: (
+      <Suspense fallback={<ContentLoader />}>
+        <ProtectedRoute role="CUSTOMER">
+          <PaymentPage />
+        </ProtectedRoute>
+      </Suspense>
+    ),
+  },
+  {
     path: '/admin/dashboard',
     element: (
       <Suspense fallback={<ContentLoader />}>
@@ -130,16 +191,6 @@ export const router = createBrowserRouter([
       <Suspense fallback={<ContentLoader />}>
         <ProtectedRoute role="ADMIN">
           <CreateChefPage />
-        </ProtectedRoute>
-      </Suspense>
-    ),
-  },
-  {
-    path: '/customer/profile',
-    element: (
-      <Suspense fallback={<ContentLoader />}>
-        <ProtectedRoute role="CUSTOMER">
-          <CustomerProfilePage />
         </ProtectedRoute>
       </Suspense>
     ),

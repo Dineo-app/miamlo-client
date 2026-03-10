@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dialog, DialogPanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon, ChevronDownIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store';
 import { logout } from '@/store/actions/authActions';
+import cartService from '@/services/cartService';
+import favoritesService from '@/services/favoritesService';
 import logo from '@/assets/images/logo-removebg.png';
 
 const Navbar = () => {
@@ -14,6 +16,36 @@ const Navbar = () => {
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const [cartCount, setCartCount] = useState(0);
+  const [favoritesCount, setFavoritesCount] = useState(0);
+
+  const isCustomer = isAuthenticated && user?.role === 'CUSTOMER';
+
+  // Fetch cart and favorites counts for CUSTOMER
+  useEffect(() => {
+    if (!isCustomer) return;
+    const fetchCounts = async () => {
+      try {
+        const [count, plats, chefs] = await Promise.all([
+          cartService.getCartCount(),
+          favoritesService.getFavoritePlats(),
+          favoritesService.getFavoriteChefs(),
+        ]);
+        setCartCount(count);
+        setFavoritesCount(plats.length + chefs.length);
+      } catch {
+        // silently ignore
+      }
+    };
+    fetchCounts();
+
+    // Refresh cart count when items are added from other pages
+    const onCartUpdated = () => {
+      cartService.getCartCount().then(setCartCount).catch(() => {});
+    };
+    window.addEventListener('cartUpdated', onCartUpdated);
+    return () => window.removeEventListener('cartUpdated', onCartUpdated);
+  }, [isCustomer]);
   
   const navigation = [
     { name: t('navbar.ourDishes'), href: '/plats' },
@@ -24,18 +56,14 @@ const Navbar = () => {
     { name: t('navbar.about'), href: '/about' },
   ];
 
-  // Get role-based routes
-  const getRoleRoutes = () => {
-    if (!user?.role) return { profile: '/customer/profile', dashboard: '/customer/dashboard' };
-    
+  // Get role-based dashboard route
+  const getDashboardRoute = () => {
+    if (!user?.role) return '/customer/dashboard';
     switch (user.role) {
-      case 'ADMIN':
-        return { profile: '/admin/profile', dashboard: '/admin/dashboard' };
-      case 'PROVIDER':
-        return { profile: '/chef/profile', dashboard: '/chef/dashboard' };
+      case 'ADMIN': return '/admin/dashboard';
+      case 'PROVIDER': return '/chef/dashboard';
       case 'CUSTOMER':
-      default:
-        return { profile: '/customer/profile', dashboard: '/customer/dashboard' };
+      default: return '/customer/dashboard';
     }
   };
 
@@ -44,7 +72,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const routes = getRoleRoutes();
+  const dashboardRoute = getDashboardRoute();
 
   return (
     <header className="w-full sticky top-0 z-40" style={{ background: 'rgba(255, 214, 10, 0.96)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
@@ -122,70 +150,64 @@ const Navbar = () => {
               </MenuItem>
             </MenuItems>
           </Menu>
+
+          {/* Customer: favorites + cart icons */}
+          {isCustomer && (
+            <>
+              <button
+                onClick={() => navigate('/customer/favorites')}
+                className="relative p-2 rounded-full hover:bg-black/5 transition-colors"
+                title={t('navbar.myFavorites')}
+              >
+                <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {favoritesCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                    {favoritesCount > 99 ? '99+' : favoritesCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => navigate('/customer/cart')}
+                className="relative p-2 rounded-full hover:bg-black/5 transition-colors"
+                title={t('navbar.myCart')}
+              >
+                <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </button>
+            </>
+          )}
+
           <button
             onClick={() => navigate('/plats')}
             className="px-5 py-2.5 text-[0.9rem] font-semibold rounded-full border border-black/20 bg-white/85 hover:bg-white transition-all"
           >
-            Télécharger l'application
+            {t('navbar.downloadApp')}
           </button>
 
           {isAuthenticated && user ? (
-            <Menu as="div" className="relative">
-              <MenuButton className="flex items-center gap-2 px-5 py-2.5 text-[0.9rem] font-semibold rounded-full bg-black text-white hover:shadow-2xl transition-all"
-                style={{ boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 22px 40px rgba(0, 0, 0, 0.35)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
-                }}
-              >
-                <UserCircleIcon className="h-5 w-5" />
-                <span>{user.firstName}</span>
-                <ChevronDownIcon className="h-4 w-4" />
-              </MenuButton>
-              <MenuItems 
-                className="absolute right-0 mt-2 w-48 origin-top-right rounded-lg focus:outline-none z-50"
-                style={{ backgroundColor: 'white', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-              >
-                <MenuItem>
-                  {({ active }) => (
-                    <button
-                      onClick={() => navigate(routes.profile)}
-                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900 first:rounded-t-lg`}
-                      style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
-                    >
-                      👤 Mon Profil
-                    </button>
-                  )}
-                </MenuItem>
-                <MenuItem>
-                  {({ active }) => (
-                    <button
-                      onClick={() => navigate(routes.dashboard)}
-                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-900`}
-                      style={{ backgroundColor: active ? '#f3f4f6' : 'white', border: 'none' }}
-                    >
-                      📊 Tableau de bord
-                    </button>
-                  )}
-                </MenuItem>
-                <div className="h-px bg-gray-200 my-1"></div>
-                <MenuItem>
-                  {({ active }) => (
-                    <button
-                      onClick={handleLogout}
-                      className={`group flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 last:rounded-b-lg`}
-                      style={{ backgroundColor: active ? '#fee2e2' : 'white', border: 'none' }}
-                    >
-                      🚪 Déconnexion
-                    </button>
-                  )}
-                </MenuItem>
-              </MenuItems>
-            </Menu>
+            <button
+              onClick={() => navigate(dashboardRoute)}
+              className="flex items-center gap-2 px-5 py-2.5 text-[0.9rem] font-semibold rounded-full bg-black text-white hover:shadow-2xl transition-all"
+              style={{ boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 22px 40px rgba(0, 0, 0, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
+              }}
+            >
+              {t('navbar.dashboard')}
+            </button>
           ) : (
             <button
               onClick={() => navigate('/login')}
@@ -200,7 +222,7 @@ const Navbar = () => {
                 e.currentTarget.style.boxShadow = '0 18px 40px rgba(0, 0, 0, 0.18)';
               }}
             >
-              Connexion / S'inscrire
+              {t('navbar.loginRegister')}
             </button>
           )}
         </div>
@@ -275,27 +297,47 @@ const Navbar = () => {
                   onClick={() => { navigate('/plats'); setMobileMenuOpen(false); }}
                   className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg border border-black/20 bg-white hover:bg-gray-50"
                 >
-                  Télécharger l'application
+                  {t('navbar.downloadApp')}
                 </button>
                 {isAuthenticated && user ? (
                   <>
+                    {user.role === 'CUSTOMER' && (
+                      <>
+                        <button
+                          onClick={() => { navigate('/customer/favorites'); setMobileMenuOpen(false); }}
+                          className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
+                        >
+                          <span>❤️ {t('navbar.myFavorites')}</span>
+                          {favoritesCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full px-1">
+                              {favoritesCount}
+                            </span>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => { navigate('/customer/cart'); setMobileMenuOpen(false); }}
+                          className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
+                        >
+                          <span>🛒 {t('navbar.myCart')}</span>
+                          {cartCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold min-w-[20px] h-[20px] flex items-center justify-center rounded-full px-1">
+                              {cartCount}
+                            </span>
+                          )}
+                        </button>
+                      </>
+                    )}
                     <button
-                      onClick={() => { navigate(routes.profile); setMobileMenuOpen(false); }}
+                      onClick={() => { navigate(dashboardRoute); setMobileMenuOpen(false); }}
                       className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
                     >
-                      👤 Mon Profil
-                    </button>
-                    <button
-                      onClick={() => { navigate(routes.dashboard); setMobileMenuOpen(false); }}
-                      className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-gray-100 hover:bg-gray-200"
-                    >
-                      📊 Tableau de bord
+                      📊 {t('navbar.dashboard')}
                     </button>
                     <button
                       onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                       className="w-full text-left px-3 py-2 text-base font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
                     >
-                      🚪 Déconnexion
+                      🚪 {t('navbar.logout')}
                     </button>
                   </>
                 ) : (
@@ -303,7 +345,7 @@ const Navbar = () => {
                     onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
                     className="w-full text-left px-3 py-2 text-base font-semibold bg-black text-white rounded-lg hover:bg-gray-800"
                   >
-                    Connexion / S'inscrire
+                    {t('navbar.loginRegister')}
                   </button>
                 )}
               </div>

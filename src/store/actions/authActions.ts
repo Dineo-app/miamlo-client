@@ -82,6 +82,12 @@ export const verifyRegistrationOtp = (data: VerifyRegistrationRequest) => {
           role: response.data.user.role,
           address: response.data.user.address,
         };
+
+        // Only CUSTOMER and ADMIN can use the website
+        if (user.role === 'PROVIDER') {
+          clearTokens();
+          throw new Error('Les chefs doivent utiliser l\'application mobile pour se connecter.');
+        }
         
         // Store user data in localStorage
         storeUserData(user);
@@ -99,7 +105,7 @@ export const verifyRegistrationOtp = (data: VerifyRegistrationRequest) => {
       
       throw new Error('Verification failed');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'OTP verification failed';
+      const errorMessage = error.response?.data?.message || error.message || 'OTP verification failed';
       dispatch({
         type: VERIFY_OTP_FAILURE,
         payload: errorMessage,
@@ -162,6 +168,12 @@ export const verifyLoginOtp = (data: VerifyOtpRequest) => {
           role: response.data.user.role,
           address: response.data.user.address,
         };
+
+        // Only CUSTOMER and ADMIN can use the website
+        if (user.role === 'PROVIDER') {
+          clearTokens();
+          throw new Error('Les chefs doivent utiliser l\'application mobile pour se connecter.');
+        }
         
         // Store user data in localStorage
         storeUserData(user);
@@ -179,7 +191,7 @@ export const verifyLoginOtp = (data: VerifyOtpRequest) => {
       
       throw new Error('Verification failed');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'OTP verification failed';
+      const errorMessage = error.response?.data?.message || error.message || 'OTP verification failed';
       dispatch({
         type: VERIFY_OTP_FAILURE,
         payload: errorMessage,
@@ -256,6 +268,19 @@ export const restoreAuth = () => {
       
       // Check if token is expired
       if (payload.exp && payload.exp < currentTime) {
+        clearTokens();
+        dispatch({
+          type: RESTORE_AUTH,
+          payload: {
+            user: null,
+            isAuthenticated: false,
+          },
+        });
+        return;
+      }
+
+      // Only CUSTOMER and ADMIN can use the website
+      if (userData.role === 'PROVIDER') {
         clearTokens();
         dispatch({
           type: RESTORE_AUTH,

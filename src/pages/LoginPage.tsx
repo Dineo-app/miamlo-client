@@ -94,7 +94,7 @@ const LoginPage = () => {
               {t('login.title')}
             </h2>
             <p className="text-gray-600">
-              {step === 'phone' ? t('login.subtitle') : 'Entrez le code reçu par SMS'}
+              {step === 'phone' ? t('login.subtitle') : t('login.otpSubtitle')}
             </p>
           </div>
 
@@ -145,7 +145,7 @@ const LoginPage = () => {
               className="w-full bg-[#ffdd00] text-black font-semibold py-3 px-4 rounded-lg hover:bg-[#ffd700] transition-colors duration-200 text-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none disabled:opacity-50"
               style={{ border: 'none', outline: 'none' }}
             >
-              {loading ? 'Envoi en cours...' : t('login.loginButton')}
+              {loading ? t('login.sending') : t('login.loginButton')}
             </button>
 
             {/* Register Link */}
@@ -162,7 +162,7 @@ const LoginPage = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div>
                 <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                  Code de vérification
+                  {t('login.otpLabel')}
                 </label>
                 <input
                   type="text"
@@ -182,7 +182,7 @@ const LoginPage = () => {
                 className="w-full bg-[#ffdd00] text-black font-semibold py-3 px-4 rounded-lg hover:bg-[#ffd700] transition-colors duration-200 text-lg border-0 outline-none focus:outline-none disabled:opacity-50"
                 style={{ border: 'none', outline: 'none' }}
               >
-                {loading ? 'Vérification...' : 'Se connecter'}
+                {loading ? t('login.verifying') : t('login.connect')}
               </button>
 
               <div className="flex flex-col gap-2">
@@ -190,16 +190,16 @@ const LoginPage = () => {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={loading}
-                  className="w-full py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                  className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
-                  Renvoyer le code
+                  {t('login.resendCode')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setStep('phone'); setOtp(''); }}
-                  className="w-full py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                  className="w-full py-2.5 text-sm font-medium text-[#b8960a] hover:text-[#ffdd00] hover:bg-[#ffdd00]/10 rounded-lg transition-colors"
                 >
-                  ← Modifier le numéro
+                  ← {t('login.changeNumber')}
                 </button>
               </div>
             </form>

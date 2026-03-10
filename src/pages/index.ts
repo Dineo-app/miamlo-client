@@ -17,7 +17,6 @@ export { default as AdminCandidatureDetailPage } from './AdminCandidatureDetailP
 export { default as ChefDashboard } from './ChefDashboard';
 export { default as ChefProfilePage } from './ChefProfilePage';
 export { default as CustomerDashboard } from './CustomerDashboard';
-export { default as CustomerProfilePage } from './CustomerProfilePage';
 export { default as CreateChefPage } from './CreateChefPage';
 export { default as PrivacyPage } from './PrivacyPage';
 export { default as TermsPage } from './TermsPage';
